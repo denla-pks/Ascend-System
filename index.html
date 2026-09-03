@@ -73,7 +73,7 @@
     <!-- พื้นที่เนื้อหาหลัก -->
     <main class="flex-1 flex flex-col overflow-y-auto bg-slate-50">
       
-      <!-- Topbar แถบบน -->
+      <!-- Topbar แถบบนพร้อมปุ่มสลับภาษา TH / EN -->
       <header class="bg-white border-b border-slate-200 px-8 py-3.5 flex items-center justify-between shadow-sm sticky top-0 z-10">
         <div>
           <h2 class="text-lg font-bold text-navy-900">{{ currentTabTitle }}</h2>
@@ -81,6 +81,11 @@
         </div>
 
         <div class="flex items-center gap-5">
+          <!-- การแจ้งเตือนสถานะการบันทึก -->
+          <span v-if="saveMessage" class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full animate-bounce">
+            {{ saveMessage }}
+          </span>
+
           <!-- ปุ่มสลับภาษา TH / EN -->
           <div class="inline-flex bg-slate-100 p-1 rounded-lg border border-slate-200">
             <button @click="lang = 'th'" :class="lang === 'th' ? 'bg-navy-900 text-white shadow font-bold' : 'text-slate-600 hover:text-navy-900 font-medium'" class="px-3 py-1 text-xs rounded-md transition flex items-center gap-1.5">
@@ -137,7 +142,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 2: ตารางสอน 4 ห้องเรียน -->
+        <!-- แท็บ 2: ตารางสอน 4 ห้องเรียน (แก้ไขในตารางได้) -->
         <div v-if="currentTab === 'schedule' || currentTab === 'dashboard'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
@@ -145,7 +150,7 @@
                 <span>📅</span>
                 <span>{{ t('classroomScheduleTitle') }}</span>
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">{{ t('rotationNote') }}</p>
+              <p class="text-xs text-slate-500 mt-0.5">{{ t('rotationNote') }} (สามารถคลิกแก้ไขชื่อวิชาในช่องได้ทันที)</p>
             </div>
 
             <div class="flex items-center gap-2">
@@ -161,29 +166,31 @@
             <div class="bg-navy-50/50 p-3.5 rounded-lg border border-navy-100 mb-4 flex items-center justify-between">
               <div>
                 <span class="text-xs font-bold text-navy-900 px-2 py-0.5 bg-navy-100 rounded">ห้อง {{ currentRoomData.code }}</span>
-                <span class="text-xs text-slate-600 ml-2 font-medium">ครูผู้สอน: <strong class="text-navy-900">{{ currentRoomData.teacher }}</strong></span>
+                <span class="text-xs text-slate-600 ml-2 font-medium">ครูผู้สอน: <input v-model="currentRoomData.teacher" @change="saveAllData" class="bg-white border border-slate-300 rounded px-2 py-0.5 text-xs text-navy-900 font-bold ml-1"></span>
               </div>
-              <span class="text-xs text-slate-500">เด่นหล้า เพชรเกษม</span>
+              <button @click="saveAllData" class="text-xs px-3 py-1 bg-navy-900 text-white font-bold rounded shadow hover:bg-navy-800">
+                💾 บันทึกตารางเรียน
+              </button>
             </div>
 
             <table class="w-full text-left text-xs border-collapse">
               <thead>
                 <tr class="bg-navy-900 text-white font-bold">
-                  <th class="py-3 px-4 rounded-l-lg">{{ t('colDay') }}</th>
-                  <th v-for="time in currentRoomData.timeSlots" :key="time" class="py-3 px-4 text-center font-mono">
-                    {{ time }}
+                  <th class="py-3 px-4 rounded-l-lg w-28">{{ t('colDay') }}</th>
+                  <th v-for="(time, tIdx) in currentRoomData.timeSlots" :key="tIdx" class="py-3 px-3 text-center font-mono">
+                    <input v-model="currentRoomData.timeSlots[tIdx]" @change="saveAllData" class="bg-navy-950/60 text-white text-center rounded px-2 py-1 text-xs w-full">
                   </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-200 bg-white">
                 <tr v-for="d in currentRoomData.days" :key="d.day" class="hover:bg-slate-50 transition">
-                  <td class="py-3.5 px-4 font-bold text-navy-900 bg-slate-50/70 border-r border-slate-100 w-32">
+                  <td class="py-3.5 px-4 font-bold text-navy-900 bg-slate-50/70 border-r border-slate-100">
                     {{ lang === 'th' ? d.day_th : d.day_en }}
                   </td>
-                  <td v-for="(subj, idx) in d.slots" :key="idx" class="py-3.5 px-3 text-center">
-                    <div class="p-2 rounded border border-slate-100 bg-slate-50 hover:border-navy-300 transition">
-                      <p class="font-bold text-slate-800">{{ lang === 'th' ? subj.th : subj.en }}</p>
-                      <span class="text-[10px] text-slate-400 mt-0.5 block font-mono">{{ subj.type }}</span>
+                  <td v-for="(subj, idx) in d.slots" :key="idx" class="py-2.5 px-2 text-center">
+                    <div class="p-1.5 rounded border border-slate-200 bg-white hover:border-navy-400 focus-within:border-navy-600 shadow-2xs">
+                      <input v-model="subj.th" @change="saveAllData" placeholder="วิชา (ไทย)" class="w-full text-center font-bold text-slate-800 text-xs border-b border-dashed border-slate-200 pb-1 focus:outline-none">
+                      <input v-model="subj.en" @change="saveAllData" placeholder="Subject (EN)" class="w-full text-center text-slate-500 text-[11px] pt-1 focus:outline-none">
                     </div>
                   </td>
                 </tr>
@@ -192,42 +199,66 @@
           </div>
         </div>
 
-        <!-- แท็บ 3: บันทึกแต้ม ASCEND (28 รายการ) -->
+        <!-- แท็บ 3: บันทึกแต้ม ASCEND (เพิ่ม/แก้ไข/ลบแถวได้) -->
         <div v-if="currentTab === 'profile'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h3 class="font-bold text-base text-navy-900">{{ t('ascendLogTitle') }}</h3>
-              <p class="text-xs text-slate-500">{{ t('ascendLogSubtitle') }}</p>
+              <p class="text-xs text-slate-500">{{ t('ascendLogSubtitle') }} (แก้ไขตัวเลขและข้อความในตารางได้โดยตรง)</p>
             </div>
-            <div class="text-xs bg-navy-50 text-navy-900 px-3 py-1.5 rounded-lg font-bold border border-navy-200">
-              {{ t('totalEntries') }}: {{ ascendLogs.length }} {{ t('items') }}
+            <div class="flex items-center gap-3">
+              <button @click="addLogEntry" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
+                <span>+</span>
+                <span>เพิ่มรายการแต้ม</span>
+              </button>
+              <button @click="saveAllData" class="px-3.5 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
+                <span>💾</span>
+                <span>บันทึกแต้ม</span>
+              </button>
             </div>
           </div>
 
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto max-h-[550px] overflow-y-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-navy-900 text-white font-bold">
+              <thead class="bg-navy-900 text-white font-bold sticky top-0 z-10">
                 <tr>
-                  <th class="py-3 px-4 rounded-l-lg">{{ t('colDate') }}</th>
-                  <th class="py-3 px-4">{{ t('colType') }}</th>
-                  <th class="py-3 px-4">{{ t('colReport') }}</th>
-                  <th class="py-3 px-4 text-center">{{ t('colAdd') }}</th>
-                  <th class="py-3 px-4 text-center">{{ t('colSub') }}</th>
-                  <th class="py-3 px-4 text-right rounded-r-lg">{{ t('colTotal') }}</th>
+                  <th class="py-3 px-3 w-28">{{ t('colDate') }}</th>
+                  <th class="py-3 px-3 w-32">{{ t('colType') }}</th>
+                  <th class="py-3 px-3">{{ t('colReport') }}</th>
+                  <th class="py-3 px-3 text-center w-20">{{ t('colAdd') }}</th>
+                  <th class="py-3 px-3 text-center w-20">{{ t('colSub') }}</th>
+                  <th class="py-3 px-3 text-right w-24">{{ t('colTotal') }}</th>
+                  <th class="py-3 px-2 text-center w-12">ลบ</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
                 <tr v-for="(log, i) in ascendLogs" :key="i" class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-mono font-medium text-slate-500">{{ log.date }}</td>
-                  <td class="py-3 px-4">
-                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-navy-50 text-navy-800 border border-navy-200">
-                      {{ log.type }}
-                    </span>
+                  <td class="py-2 px-3 font-mono">
+                    <input v-model="log.date" @change="saveAllData" class="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-1 text-xs">
                   </td>
-                  <td class="py-3 px-4 font-medium text-slate-800">{{ lang === 'th' ? log.issue_th : log.issue }}</td>
-                  <td class="py-3 px-4 text-center font-bold text-emerald-600">{{ log.add ? '+' + log.add : '-' }}</td>
-                  <td class="py-3 px-4 text-center font-bold text-rose-600">{{ log.sub ? '-' + log.sub : '-' }}</td>
-                  <td class="py-3 px-4 text-right font-bold font-mono text-navy-900">{{ log.total.toLocaleString() }}</td>
+                  <td class="py-2 px-3">
+                    <select v-model="log.type" @change="saveAllData" class="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 text-xs">
+                      <option value="Professionalism">Professionalism</option>
+                      <option value="Attendance">Attendance</option>
+                      <option value="Academic">Academic</option>
+                      <option value="Survey">Survey</option>
+                    </select>
+                  </td>
+                  <td class="py-2 px-3">
+                    <input v-model="log.issue_th" @change="saveAllData" class="w-full border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800" placeholder="คำอธิบายภาษาไทย">
+                  </td>
+                  <td class="py-2 px-3 text-center">
+                    <input type="number" v-model.number="log.add" @input="recalculatePoints" class="w-16 text-center font-bold text-emerald-600 border border-slate-200 rounded py-1 text-xs">
+                  </td>
+                  <td class="py-2 px-3 text-center">
+                    <input type="number" v-model.number="log.sub" @input="recalculatePoints" class="w-16 text-center font-bold text-rose-600 border border-slate-200 rounded py-1 text-xs">
+                  </td>
+                  <td class="py-2 px-3 text-right font-bold font-mono text-navy-900">
+                    {{ log.total.toLocaleString() }}
+                  </td>
+                  <td class="py-2 px-2 text-center">
+                    <button @click="deleteLogEntry(i)" class="text-slate-400 hover:text-rose-600 font-bold text-sm">✕</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -290,69 +321,76 @@
           </div>
         </div>
 
-        <!-- แท็บ 5: พื้นที่ทำงานเอกสารชีตในระบบ (Workspaces & Sheet Editors) -->
+        <!-- แท็บ 5: พื้นที่ทำงานเอกสาร & ตารางบันทึกข้อมูลออนไลน์ (Interactive Sheet Grid Editor) -->
         <div v-if="currentTab === 'links'" class="space-y-6">
-          
-          <!-- เมื่อยังไม่ได้เลือกชีต: แสดงการ์ด 6 ใบพร้อมปุ่ม "เปิดทำงานในระบบ" -->
-          <div v-if="!activeSheet" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
-            <div class="border-b border-slate-100 pb-4">
-              <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
-                <span>📑</span>
-                <span>{{ lang === 'th' ? 'พื้นที่ทำงานเอกสารและชีตออนไลน์' : 'Workspace & Online Spreadsheets' }}</span>
-              </h3>
-              <p class="text-xs text-slate-500 mt-0.5">{{ lang === 'th' ? 'เลือกเอกสารที่ต้องการเปิดทำงาน จัดการ และบันทึกข้อมูลได้โดยตรงในระบบ' : 'Click any document below to open and work directly inside the system' }}</p>
-            </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                  <span>📑</span>
+                  <span>{{ lang === 'th' ? 'พื้นที่กรอกและบันทึกเอกสารข้อมูลในระบบ' : 'Interactive Document & Grid Editor' }}</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">{{ lang === 'th' ? 'เลือกเอกสารที่ต้องการเพื่อพิมพ์กรอกข้อมูล แก้ไข หรือเพิ่มแถวได้ทันทีในหน้านี้' : 'Select a sheet template to edit, fill data and add new records directly' }}</p>
+              </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div v-for="item in workspaceSheets" :key="item.id"
-                   @click="openWorkspace(item)"
-                   class="p-4 rounded-xl border border-slate-200 hover:border-navy-500 hover:shadow-md transition bg-slate-50/60 hover:bg-white cursor-pointer group flex items-center justify-between">
-                <div class="pr-3">
-                  <p class="text-[11px] font-bold text-navy-700 uppercase tracking-wider">{{ item.category }}</p>
-                  <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">{{ item.title }}</p>
-                  <p class="text-xs text-slate-400 mt-1">{{ item.description }}</p>
-                </div>
-                <button class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-navy-900 text-white group-hover:bg-navy-800 shadow transition flex-shrink-0 flex items-center gap-1.5">
-                  <span>{{ lang === 'th' ? 'เข้าทำงาน' : 'Open' }}</span>
-                  <span>➜</span>
+              <!-- ปุ่มเลือกสลับเอกสารที่ต้องการกรอก -->
+              <div class="flex flex-wrap items-center gap-2">
+                <button v-for="sheet in gridSheets" :key="sheet.id" @click="activeGridSheetId = sheet.id"
+                  :class="activeGridSheetId === sheet.id ? 'bg-navy-900 text-white font-bold shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold'"
+                  class="px-3.5 py-1.5 rounded-lg text-xs transition">
+                  {{ sheet.title }}
                 </button>
               </div>
             </div>
+
+            <!-- กล่องควบคุมแถวและการบันทึกข้อมูลของชีตที่เลือก -->
+            <div class="bg-navy-50/60 p-4 rounded-xl border border-navy-100 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h4 class="font-bold text-xs text-navy-900">{{ currentGridSheet.title }}</h4>
+                <p class="text-[11px] text-slate-500">{{ currentGridSheet.description }}</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <button @click="addGridRow" class="px-3 py-1.5 bg-white border border-slate-300 hover:border-navy-500 text-navy-900 font-bold text-xs rounded-lg shadow-2xs transition flex items-center gap-1">
+                  <span>+</span>
+                  <span>{{ lang === 'th' ? 'เพิ่มแถวใหม่' : 'Add Row' }}</span>
+                </button>
+                <button @click="saveAllData" class="px-4 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5">
+                  <span>💾</span>
+                  <span>{{ lang === 'th' ? 'บันทึกข้อมูลหน้านี้' : 'Save Sheet' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ตารางกรอกข้อมูลที่แก้ไขได้จริง (Editable Data Grid) -->
+            <div class="overflow-x-auto rounded-lg border border-slate-200">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-navy-900 text-white font-bold">
+                    <th v-for="col in currentGridSheet.columns" :key="col.key" class="py-3 px-3 text-center">
+                      {{ lang === 'th' ? col.label_th : col.label_en }}
+                    </th>
+                    <th class="py-3 px-2 text-center w-12">ลบ</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  <tr v-for="(row, rIdx) in currentGridSheet.rows" :key="rIdx" class="hover:bg-slate-50 transition">
+                    <td v-for="col in currentGridSheet.columns" :key="col.key" class="py-2 px-2">
+                      <input v-model="row[col.key]" @change="saveAllData"
+                             :placeholder="col.label_th"
+                             class="w-full border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none focus:border-navy-500 bg-slate-50/50 hover:bg-white transition">
+                    </td>
+                    <td class="py-2 px-2 text-center">
+                      <button @click="deleteGridRow(rIdx)" class="text-slate-400 hover:text-rose-600 font-bold text-sm">✕</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="text-[11px] text-slate-400 text-right">
+              * ข้อมูลที่พิมพ์จะถูกบันทึกเก็บไว้ในระบบทันที ไม่สูญหายเมื่อรีเฟรชหน้าต่าง
+            </p>
           </div>
-
-          <!-- เมื่อคลิกเลือกชีต: แสดงหน้าจอทำงานในระบบ (Interactive Workspace Viewer) -->
-          <div v-else class="bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden flex flex-col h-[780px]">
-            <!-- แถบเมนูด้านบนของพื้นที่ทำงาน -->
-            <div class="bg-navy-900 text-white px-5 py-3 flex items-center justify-between shadow">
-              <div class="flex items-center gap-3">
-                <button @click="activeSheet = null" class="p-1.5 hover:bg-navy-800 rounded-md transition text-xs font-bold flex items-center gap-1 text-navy-200 hover:text-white">
-                  <span>←</span>
-                  <span>{{ lang === 'th' ? 'กลับหน้ารวมเอกสาร' : 'Back to List' }}</span>
-                </button>
-                <div class="h-4 w-px bg-navy-700"></div>
-                <div>
-                  <h4 class="font-bold text-xs text-white">{{ activeSheet.title }}</h4>
-                  <span class="text-[10px] text-navy-200">{{ activeSheet.category }} • {{ lang === 'th' ? 'กำลังทำงานในระบบ' : 'Active In-System Workspace' }}</span>
-                </div>
-              </div>
-
-              <!-- ปุ่มเครื่องมือเสริม -->
-              <div class="flex items-center gap-2">
-                <a :href="activeSheet.url" target="_blank" class="px-3 py-1 bg-navy-800 hover:bg-navy-700 text-navy-100 rounded text-xs font-medium transition flex items-center gap-1">
-                  <span>เปิดแท็บใหม่ ↗</span>
-                </a>
-                <button @click="activeSheet = null" class="px-3 py-1 bg-rose-600/80 hover:bg-rose-600 text-white rounded text-xs font-bold transition">
-                  ✕ ปิดหน้าจอ
-                </button>
-              </div>
-            </div>
-
-            <!-- ส่วนฝังชีตสำหรับทำงานโดยตรง (Interactive Iframe View) -->
-            <div class="flex-1 bg-slate-100 relative">
-              <iframe :src="activeSheet.embedUrl" class="w-full h-full border-0" allow="autoplay"></iframe>
-            </div>
-          </div>
-
         </div>
 
       </div>
@@ -410,7 +448,7 @@
         menuSchedule: 'ตารางสอน 4 ห้องเรียน',
         menuProfile: 'บันทึกแต้ม ASCEND (28 รายการ)',
         menuComments: 'คลังความเห็น & สมุดพก',
-        menuLinks: 'พื้นที่ทำงานเอกสาร & ชีต',
+        menuLinks: 'พื้นที่กรอกเอกสาร & ชีต',
       },
       en: {
         appTitle: 'School Academic System',
@@ -459,7 +497,7 @@
         menuSchedule: 'Schedules (4 Classes)',
         menuProfile: 'ASCEND Log (28 Records)',
         menuComments: 'Comment Bank & Reports',
-        menuLinks: 'Workspaces & Spreadsheets',
+        menuLinks: 'Document & Sheet Grids',
       }
     };
 
@@ -469,7 +507,8 @@
           lang: 'th',
           currentTab: 'dashboard',
           activeRoom: '1.1',
-          activeSheet: null,
+          saveMessage: '',
+          activeGridSheetId: 'lesson_plans',
           teacher: {
             fullName: 'Mr. Jaun Dre Steyn (JD)',
             nickname: 'JD',
@@ -488,61 +527,71 @@
             { id: 'comments', i18nKey: 'menuComments', icon: '💬' },
             { id: 'links', i18nKey: 'menuLinks', icon: '📑' },
           ],
-          workspaceSheets: [
-            {
-              id: 'schedule_master',
-              category: 'CLASS SCHEDULE',
-              title: 'PHET: Class Schedules 2025-2026',
-              description: 'ตารางสอนรวมทุกระดับชั้นและกิจกรรมโรงเรียน',
-              url: 'https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit',
-              embedUrl: 'https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit?rm=embedded'
-            },
-            {
-              id: 'rotation_10days',
-              category: '10-DAY ROTATION',
-              title: 'Phetkasem 10 days Term 1; 2025-2026',
-              description: 'ตารางเวียน 10 วัน สัปดาห์คู่และสัปดาห์คี่',
-              url: 'https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit',
-              embedUrl: 'https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit?rm=embedded'
-            },
-            {
-              id: 'academy_afterschool',
-              category: 'ACADEMY SCHEDULE',
-              title: '2025 After school schedule',
-              description: 'ตารางเรียนพิเศษหลังเลิกเรียน Oxford, Little Owls, Bizzy Bee',
-              url: 'https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit',
-              embedUrl: 'https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit?rm=embedded'
-            },
-            {
-              id: 'lesson_plans',
-              category: 'LESSON PLANS',
-              title: 'JD-Lesson Plans (DIP)',
-              description: 'แผนการจัดการเรียนรู้รายสัปดาห์ Week 0 - Week 19',
-              url: 'https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit',
-              embedUrl: 'https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit?rm=embedded'
-            },
-            {
-              id: 'comment_trackers',
-              category: 'COMMENT TRACKER',
-              title: 'P4 - JD - Comment Trackers',
-              description: 'ตัวติดตามข้อคิดเห็นรายงานผลการเรียนรายบุคคล',
-              url: 'https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit',
-              embedUrl: 'https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit?rm=embedded'
-            },
-            {
-              id: 'speaking_hfw',
-              category: 'ASSESSMENT',
-              title: 'Speaking & HFW Tests Scoresheets (K2.6)',
-              description: 'เกณฑ์คะแนนทดสอบการพูดและคำศัพท์พื้นฐาน',
-              url: 'https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit',
-              embedUrl: 'https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit?rm=embedded'
-            }
-          ],
           classrooms: [
             { code: '1.1', name: 'ห้อง K1.1', teacher: 'Teacher JD' },
             { code: '1.4', name: 'ห้อง K1.4', teacher: 'Teacher Dee' },
             { code: '2.5', name: 'ห้อง K2.5', teacher: 'Teacher JD' },
             { code: '2.6', name: 'ห้อง K2.6', teacher: 'Teacher Jenna' },
+          ],
+          // ชุดข้อมูลชีตตารางที่กรอกและแก้ไขได้ในระบบ
+          gridSheets: [
+            {
+              id: 'lesson_plans',
+              title: 'แผนการสอน (JD-Lesson Plans)',
+              description: 'เทมเพลตแผนการจัดการเรียนรู้ 30 นาที รายสัปดาห์ (Week 0 - 19)',
+              columns: [
+                { key: 'week', label_th: 'สัปดาห์ / วัน', label_en: 'Week / Day' },
+                { key: 'time', label_th: 'ช่วงเวลา', label_en: 'Time Slot' },
+                { key: 'subject', label_th: 'รายวิชา / เนื้อหา', label_en: 'Subject / Topic' },
+                { key: 'activity', label_th: 'กิจกรรมการเรียนรู้', label_en: 'Activity Steps' },
+                { key: 'materials', label_th: 'สื่อ / อุปกรณ์', label_en: 'Materials' },
+                { key: 'status', label_th: 'สถานะส่งแผน', label_en: 'Status' }
+              ],
+              rows: [
+                { week: 'Monday Week 1', time: '08:00 - 08:30', subject: 'Computer (Phonics)', activity: 'Interactive phonics letter game on screen', materials: 'Smartboard / Worksheets', status: 'Submitted' },
+                { week: 'Monday Week 1', time: '08:30 - 09:00', subject: 'Phonics 1', activity: 'Circle time blending Aa-Zz letter sounds', materials: 'Flashcards, Song tracks', status: 'Submitted' },
+                { week: 'Tuesday Week 1', time: '10:10 - 10:40', subject: 'Science - Taste', activity: 'Taste test sweet & salty with fruits', materials: 'Bananas, Salt, Small plates', status: 'Approved' },
+                { week: 'Wednesday Week 1', time: '12:20 - 12:50', subject: 'Reading & HFW', activity: 'Guided reading high frequency words', materials: 'Storybook, Star stickers', status: 'Draft' }
+              ]
+            },
+            {
+              id: 'afterschool',
+              title: 'ตารางเรียนพิเศษ (After School)',
+              description: 'ตารางเรียนและรายชื่อผู้สอนคอร์ส Oxford, Little Owls, Bizzy Bee',
+              columns: [
+                { key: 'course', label_th: 'คอร์สเรียน', label_en: 'Course' },
+                { key: 'days', label_th: 'วันเรียน', label_en: 'Days' },
+                { key: 'time', label_th: 'เวลา', label_en: 'Time' },
+                { key: 'room', label_th: 'ห้องเรียน', label_en: 'Room' },
+                { key: 'teacher', label_th: 'ครูผู้สอน', label_en: 'Teacher' },
+                { key: 'students_count', label_th: 'จำนวนเด็ก', label_en: 'Students' }
+              ],
+              rows: [
+                { course: 'Oxford Round 1', days: 'M / W / F', time: '14:00 - 15:00', room: 'B204', teacher: 'Teacher JD', students_count: '12' },
+                { course: 'Oxford Round 2', days: 'M / W / F', time: '15:10 - 16:10', room: 'B204', teacher: 'Teacher JD', students_count: '10' },
+                { course: 'Little Owls Round 1', days: 'T / TH', time: '14:00 - 15:00', room: 'A113', teacher: 'Teacher Janna', students_count: '8' },
+                { course: 'Bizzy Bee Round 1', days: 'T / TH', time: '14:10 - 15:10', room: 'B202', teacher: 'Teacher Karen', students_count: '14' }
+              ]
+            },
+            {
+              id: 'speaking_test',
+              title: 'ผลสอบพูด & คำศัพท์ (Speaking & HFW)',
+              description: 'บันทึกคะแนนทดสอบ Speaking และ High Frequency Words ประจำภาคเรียน',
+              columns: [
+                { key: 'student_name', label_th: 'ชื่อนักเรียน', label_en: 'Student Name' },
+                { key: 'classroom', label_th: 'ห้อง', label_en: 'Class' },
+                { key: 'speaking_score', label_th: 'Speaking (25)', label_en: 'Speaking (25)' },
+                { key: 'hfw_score', label_th: 'HFW Words (25)', label_en: 'HFW Words (25)' },
+                { key: 'total_score', label_th: 'รวม (50)', label_en: 'Total (50)' },
+                { key: 'grade', label_th: 'เกรด', label_en: 'Grade' }
+              ],
+              rows: [
+                { student_name: 'Perkin', classroom: 'K1.1', speaking_score: '24', hfw_score: '25', total_score: '49', grade: 'A+' },
+                { student_name: 'Kin', classroom: 'K2.5', speaking_score: '25', hfw_score: '24', total_score: '49', grade: 'A+' },
+                { student_name: 'Tim', classroom: 'K1.4', speaking_score: '23', hfw_score: '23', total_score: '46', grade: 'A' },
+                { student_name: 'Arya', classroom: 'K1.4', speaking_score: '25', hfw_score: '25', total_score: '50', grade: 'A+' }
+              ]
+            }
           ],
           scheduleData: {
             '1.1': {
@@ -550,51 +599,11 @@
               teacher: 'Teacher JD',
               timeSlots: ['08:00 - 08:30', '08:30 - 09:00', '10:10 - 10:40', '10:40 - 11:10'],
               days: [
-                {
-                  day_th: 'วันจันทร์', day_en: 'Monday',
-                  slots: [
-                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' },
-                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' },
-                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' },
-                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันอังคาร', day_en: 'Tuesday',
-                  slots: [
-                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
-                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
-                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
-                    { th: 'สนทนา Show & Tell', en: 'Show and Tell Conver.', type: 'Speaking' }
-                  ]
-                },
-                {
-                  day_th: 'วันพุธ', day_en: 'Wednesday',
-                  slots: [
-                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' },
-                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
-                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' },
-                    { th: 'Student Book + CD', en: 'Student Book + CD', type: 'Textbook' }
-                  ]
-                },
-                {
-                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
-                  slots: [
-                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
-                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' },
-                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
-                    { th: 'แบบฝึกหัด Workbook 1', en: 'Workbook 1', type: 'Exercise' }
-                  ]
-                },
-                {
-                  day_th: 'วันศุกร์', day_en: 'Friday',
-                  slots: [
-                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' },
-                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' },
-                    { th: 'แบบฝึกหัด Workbook 2', en: 'Workbook 2', type: 'Exercise' },
-                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' }
-                  ]
-                }
+                { day_th: 'วันจันทร์', day_en: 'Monday', slots: [{ th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)' }, { th: 'โฟนิกส์ 1', en: 'Phonics 1' }, { th: 'คณิตศาสตร์ 1', en: 'Math 1' }, { th: 'ภาษาอังกฤษ 1', en: 'English 1' }] },
+                { day_th: 'วันอังคาร', day_en: 'Tuesday', slots: [{ th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside' }, { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)' }, { th: 'ภาษาอังกฤษ 2', en: 'English 2' }, { th: 'สนทนา Show & Tell', en: 'Show and Tell Conver.' }] },
+                { day_th: 'วันพุธ', day_en: 'Wednesday', slots: [{ th: 'โฟนิกส์ 2', en: 'Phonics 2' }, { th: 'ภาษาอังกฤษ 3', en: 'English 3' }, { th: 'คณิตศาสตร์ 2', en: 'Math 2' }, { th: 'Student Book + CD', en: 'Student Book + CD' }] },
+                { day_th: 'วันพฤหัสบดี', day_en: 'Thursday', slots: [{ th: 'วิทยาศาสตร์', en: 'Science 1' }, { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2' }, { th: 'Show and Tell', en: 'Show and Tell' }, { th: 'แบบฝึกหัด Workbook 1', en: 'Workbook 1' }] },
+                { day_th: 'วันศุกร์', day_en: 'Friday', slots: [{ th: 'โฟนิกส์ 3', en: 'Phonics 3' }, { th: 'ภาษาอังกฤษ 4', en: 'English 4' }, { th: 'แบบฝึกหัด Workbook 2', en: 'Workbook 2' }, { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play' }] }
               ]
             },
             '1.4': {
@@ -602,51 +611,11 @@
               teacher: 'Teacher Dee',
               timeSlots: ['08:00 - 08:30', '08:30 - 09:00', '10:10 - 10:40', '10:40 - 11:10'],
               days: [
-                {
-                  day_th: 'วันจันทร์', day_en: 'Monday',
-                  slots: [
-                    { th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.', type: 'Speaking' },
-                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' },
-                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' },
-                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' }
-                  ]
-                },
-                {
-                  day_th: 'วันอังคาร', day_en: 'Tuesday',
-                  slots: [
-                    { th: 'Student Book + CD', en: 'Student Book + CD', type: 'Textbook' },
-                    { th: 'แบบฝึกหัด Workbook 1', en: 'Workbook 1', type: 'Exercise' },
-                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
-                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันพุธ', day_en: 'Wednesday',
-                  slots: [
-                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' },
-                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
-                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
-                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
-                  slots: [
-                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
-                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
-                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
-                    { th: 'แบบฝึกหัด Workbook 2', en: 'Workbook 2', type: 'Exercise' }
-                  ]
-                },
-                {
-                  day_th: 'วันศุกร์', day_en: 'Friday',
-                  slots: [
-                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' },
-                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' },
-                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
-                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' }
-                  ]
-                }
+                { day_th: 'วันจันทร์', day_en: 'Monday', slots: [{ th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.' }, { th: 'ภาษาอังกฤษ 1', en: 'English 1' }, { th: 'โฟนิกส์ 1', en: 'Phonics 1' }, { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)' }] },
+                { day_th: 'วันอังคาร', day_en: 'Tuesday', slots: [{ th: 'Student Book + CD', en: 'Student Book + CD' }, { th: 'แบบฝึกหัด Workbook 1', en: 'Workbook 1' }, { th: 'ภาษาอังกฤษ 2', en: 'English 2' }, { th: 'คณิตศาสตร์ 1', en: 'Math 1' }] },
+                { day_th: 'วันพุธ', day_en: 'Wednesday', slots: [{ th: 'โฟนิกส์ 2', en: 'Phonics 2' }, { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside' }, { th: 'วิทยาศาสตร์', en: 'Science 1' }, { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2' }] },
+                { day_th: 'วันพฤหัสบดี', day_en: 'Thursday', slots: [{ th: 'ภาษาอังกฤษ 3', en: 'English 3' }, { th: 'Show and Tell', en: 'Show and Tell' }, { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)' }, { th: 'แบบฝึกหัด Workbook 2', en: 'Workbook 2' }] },
+                { day_th: 'วันศุกร์', day_en: 'Friday', slots: [{ th: 'โฟนิกส์ 3', en: 'Phonics 3' }, { th: 'ภาษาอังกฤษ 4', en: 'English 4' }, { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play' }, { th: 'คณิตศาสตร์ 2', en: 'Math 2' }] }
               ]
             },
             '2.5': {
@@ -654,51 +623,11 @@
               teacher: 'Teacher JD',
               timeSlots: ['09:00 - 09:30', '09:40 - 10:10', '12:20 - 12:50', '12:50 - 13:20'],
               days: [
-                {
-                  day_th: 'วันจันทร์', day_en: 'Monday',
-                  slots: [
-                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
-                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' },
-                    { th: 'การอ่านสะกดคำ', en: 'Reading', type: 'Reading' },
-                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันอังคาร', day_en: 'Tuesday',
-                  slots: [
-                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' },
-                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
-                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
-                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันพุธ', day_en: 'Wednesday',
-                  slots: [
-                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
-                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
-                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
-                    { th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.', type: 'Speaking' }
-                  ]
-                },
-                {
-                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
-                  slots: [
-                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' },
-                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' },
-                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' },
-                    { th: 'การเขียนภาษาอังกฤษ', en: 'Writing', type: 'Writing' }
-                  ]
-                },
-                {
-                  day_th: 'วันศุกร์', day_en: 'Friday',
-                  slots: [
-                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' },
-                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
-                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
-                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' }
-                  ]
-                }
+                { day_th: 'วันจันทร์', day_en: 'Monday', slots: [{ th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside' }, { th: 'ภาษาอังกฤษ 1', en: 'English 1' }, { th: 'การอ่านสะกดคำ', en: 'Reading' }, { th: 'โฟนิกส์ 1', en: 'Phonics 1' }] },
+                { day_th: 'วันอังคาร', day_en: 'Tuesday', slots: [{ th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)' }, { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play' }, { th: 'ภาษาอังกฤษ 2', en: 'English 2' }, { th: 'คณิตศาสตร์ 1', en: 'Math 1' }] },
+                { day_th: 'วันพุธ', day_en: 'Wednesday', slots: [{ th: 'Show and Tell', en: 'Show and Tell' }, { th: 'ภาษาอังกฤษ 3', en: 'English 3' }, { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play' }, { th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.' }] },
+                { day_th: 'วันพฤหัสบดี', day_en: 'Thursday', slots: [{ th: 'คณิตศาสตร์ 2', en: 'Math 2' }, { th: 'ภาษาอังกฤษ 4', en: 'English 4' }, { th: 'โฟนิกส์ 2', en: 'Phonics 2' }, { th: 'การเขียนภาษาอังกฤษ', en: 'Writing' }] },
+                { day_th: 'วันศุกร์', day_en: 'Friday', slots: [{ th: 'โฟนิกส์ 3', en: 'Phonics 3' }, { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)' }, { th: 'วิทยาศาสตร์', en: 'Science 1' }, { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2' }] }
               ]
             },
             '2.6': {
@@ -706,51 +635,11 @@
               teacher: 'Teacher Jenna',
               timeSlots: ['09:00 - 09:30', '09:40 - 10:10', '12:20 - 12:50', '12:50 - 13:20'],
               days: [
-                {
-                  day_th: 'วันจันทร์', day_en: 'Monday',
-                  slots: [
-                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' },
-                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' },
-                    { th: 'การอ่านสะกดคำ', en: 'Reading', type: 'Reading' },
-                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันอังคาร', day_en: 'Tuesday',
-                  slots: [
-                    { th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.', type: 'Speaking' },
-                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' },
-                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
-                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันพุธ', day_en: 'Wednesday',
-                  slots: [
-                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
-                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
-                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
-                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
-                  slots: [
-                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
-                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
-                    { th: 'การเขียนภาษาอังกฤษ', en: 'Writing', type: 'Writing' },
-                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' }
-                  ]
-                },
-                {
-                  day_th: 'วันศุกร์', day_en: 'Friday',
-                  slots: [
-                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
-                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' },
-                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
-                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' }
-                  ]
-                }
+                { day_th: 'วันจันทร์', day_en: 'Monday', slots: [{ th: 'ภาษาอังกฤษ 1', en: 'English 1' }, { th: 'คณิตศาสตร์ 1', en: 'Math 1' }, { th: 'การอ่านสะกดคำ', en: 'Reading' }, { th: 'โฟนิกส์ 1', en: 'Phonics 1' }] },
+                { day_th: 'วันอังคาร', day_en: 'Tuesday', slots: [{ th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.' }, { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)' }, { th: 'ภาษาอังกฤษ 2', en: 'English 2' }, { th: 'โฟนิกส์ 2', en: 'Phonics 2' }] },
+                { day_th: 'วันพุธ', day_en: 'Wednesday', slots: [{ th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play' }, { th: 'Show and Tell', en: 'Show and Tell' }, { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)' }, { th: 'คณิตศาสตร์ 2', en: 'Math 2' }] },
+                { day_th: 'วันพฤหัสบดี', day_en: 'Thursday', slots: [{ th: 'ภาษาอังกฤษ 3', en: 'English 3' }, { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play' }, { th: 'การเขียนภาษาอังกฤษ', en: 'Writing' }, { th: 'โฟนิกส์ 3', en: 'Phonics 3' }] },
+                { day_th: 'วันศุกร์', day_en: 'Friday', slots: [{ th: 'วิทยาศาสตร์', en: 'Science 1' }, { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2' }, { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside' }, { th: 'ภาษาอังกฤษ 4', en: 'English 4' }] }
               ]
             }
           },
@@ -792,22 +681,10 @@
           selectedCategory: 'CHARACTERISTICS',
           selectedLevel: 'Good',
           availableTemplates: [
-            {
-              en: "____ is an intelligent boy/girl who always shows interest in learning.",
-              th: "____ เป็นเด็กที่เฉลียวฉลาดและมีความสนใจในการเรียนรู้อย่างสม่ำเสมอ"
-            },
-            {
-              en: "____ , being both bright and sociable, is a real asset to our class.",
-              th: "____ มีความกระตือรือร้นและเข้ากับเพื่อนๆ ได้ดี นับเป็นกำลังสำคัญของห้องเรียน"
-            },
-            {
-              en: "As I get to know ____ , I realize what an interesting and creative individual she/he is.",
-              th: "ยิ่งได้รู้จัก ____ ยิ่งพบว่าเป็นเด็กที่มีความคิดสร้างสรรค์และน่าสนใจมาก"
-            },
-            {
-              en: "____ is becoming a confident English speaker.",
-              th: "____ มีความมั่นใจในการพูดภาษาอังกฤษมากขึ้นอย่างเห็นได้ชัด"
-            }
+            { en: "____ is an intelligent boy/girl who always shows interest in learning.", th: "____ เป็นเด็กที่เฉลียวฉลาดและมีความสนใจในการเรียนรู้อย่างสม่ำเสมอ" },
+            { en: "____ , being both bright and sociable, is a real asset to our class.", th: "____ มีความกระตือรือร้นและเข้ากับเพื่อนๆ ได้ดี นับเป็นกำลังสำคัญของห้องเรียน" },
+            { en: "As I get to know ____ , I realize what an interesting and creative individual she/he is.", th: "ยิ่งได้รู้จัก ____ ยิ่งพบว่าเป็นเด็กที่มีความคิดสร้างสรรค์และน่าสนใจมาก" },
+            { en: "____ is becoming a confident English speaker.", th: "____ มีความมั่นใจในการพูดภาษาอังกฤษมากขึ้นอย่างเห็นได้ชัด" }
           ],
           generatedComment: ''
         };
@@ -819,14 +696,89 @@
         },
         currentRoomData() {
           return this.scheduleData[this.activeRoom] || this.scheduleData['1.1'];
+        },
+        currentGridSheet() {
+          return this.gridSheets.find(s => s.id === this.activeGridSheetId) || this.gridSheets[0];
         }
+      },
+      mounted() {
+        // โหลดข้อมูลที่เคยบันทึกไว้ในเบราว์เซอร์อัตโนมัติ
+        this.loadSavedData();
       },
       methods: {
         t(key) {
           return translations[this.lang][key] || key;
         },
-        openWorkspace(sheetItem) {
-          this.activeSheet = sheetItem;
+        addLogEntry() {
+          const today = new Date().toISOString().split('T')[0];
+          this.ascendLogs.unshift({
+            date: today,
+            type: 'Professionalism',
+            add: 20,
+            sub: 0,
+            total: this.teacher.points + 20,
+            issue: 'New logged task',
+            issue_th: 'บันทึกการปฏิบัติงานใหม่'
+          });
+          this.recalculatePoints();
+        },
+        deleteLogEntry(index) {
+          if (confirm('ยืนยันลบรายการนี้?')) {
+            this.ascendLogs.splice(index, 1);
+            this.recalculatePoints();
+          }
+        },
+        recalculatePoints() {
+          let running = 2300;
+          for (let i = this.ascendLogs.length - 1; i >= 0; i--) {
+            running = running + (Number(this.ascendLogs[i].add) || 0) - (Number(this.ascendLogs[i].sub) || 0);
+            this.ascendLogs[i].total = running;
+          }
+          this.teacher.points = running;
+          this.saveAllData();
+        },
+        addGridRow() {
+          const newRow = {};
+          this.currentGridSheet.columns.forEach(col => {
+            newRow[col.key] = '';
+          });
+          this.currentGridSheet.rows.push(newRow);
+          this.saveAllData();
+        },
+        deleteGridRow(index) {
+          if (confirm('ยืนยันลบแถวนี้?')) {
+            this.currentGridSheet.rows.splice(index, 1);
+            this.saveAllData();
+          }
+        },
+        saveAllData() {
+          try {
+            const dataToSave = {
+              scheduleData: this.scheduleData,
+              ascendLogs: this.ascendLogs,
+              gridSheets: this.gridSheets,
+              teacher: this.teacher
+            };
+            localStorage.setItem('ascend_saved_system_data', JSON.stringify(dataToSave));
+            this.saveMessage = '✓ บันทึกข้อมูลสำเร็จ';
+            setTimeout(() => { this.saveMessage = ''; }, 2500);
+          } catch (e) {
+            console.error('บันทึกล้มเหลว:', e);
+          }
+        },
+        loadSavedData() {
+          try {
+            const saved = localStorage.getItem('ascend_saved_system_data');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.scheduleData) this.scheduleData = parsed.scheduleData;
+              if (parsed.ascendLogs) this.ascendLogs = parsed.ascendLogs;
+              if (parsed.gridSheets) this.gridSheets = parsed.gridSheets;
+              if (parsed.teacher) this.teacher = parsed.teacher;
+            }
+          } catch (e) {
+            console.error('โหลดข้อมูลเดิมล้มเหลว:', e);
+          }
         },
         previewSentence(text) {
           if (!this.selectedStudent) return text;
@@ -845,7 +797,7 @@
         },
         saveComment() {
           if (!this.generatedComment) return;
-          alert(this.lang === 'th' ? 'บันทึกความเห็นเรียบร้อยแล้ว!' : 'Report comment saved successfully!');
+          alert(this.lang === 'th' ? 'บันทึกความเห็นลงสมุดพกสำเร็จ!' : 'Report comment saved successfully!');
         }
       }
     }).mount('#app');
