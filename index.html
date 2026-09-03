@@ -81,7 +81,6 @@
         </div>
 
         <div class="flex items-center gap-5">
-          <!-- การแจ้งเตือนสถานะการบันทึก -->
           <span v-if="saveMessage" class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full animate-bounce">
             {{ saveMessage }}
           </span>
@@ -123,34 +122,140 @@
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500 font-medium">{{ t('avgObserveScore') }}</p>
-              <p class="text-3xl font-bold text-emerald-600 mt-1">{{ teacher.avgScore }}</p>
-              <p class="text-xs text-slate-400 mt-2">{{ t('latestScore') }}: 55/55 A+</p>
+              <p class="text-xs text-slate-500 font-medium">ครูในระบบทั้งหมด</p>
+              <p class="text-3xl font-bold text-emerald-600 mt-1">{{ teacherList.length }} ท่าน</p>
+              <p class="text-xs text-slate-400 mt-2">ครูผู้สอนหลัก 18 / ครูภาษา 7</p>
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500 font-medium">{{ t('leaveBalance') }}</p>
-              <p class="text-3xl font-bold text-navy-700 mt-1">6 {{ t('days') }}</p>
-              <p class="text-xs text-slate-400 mt-2">{{ t('leaveDetail') }}</p>
+              <p class="text-xs text-slate-500 font-medium">ห้องเรียนทั้งหมด</p>
+              <p class="text-3xl font-bold text-navy-700 mt-1">{{ classroomList.length }} ห้อง</p>
+              <p class="text-xs text-slate-400 mt-2">Pre-K, K1, K2, K3 ครบทุกระดับ</p>
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500 font-medium">{{ t('termChecklist') }}</p>
-              <p class="text-3xl font-bold text-slate-700 mt-1">0 / 6 {{ t('items') }}</p>
-              <p class="text-xs text-slate-400 mt-2">{{ t('pendingReview') }}</p>
+              <p class="text-xs text-slate-500 font-medium">สิทธิ์การลาคงเหลือ (JD)</p>
+              <p class="text-3xl font-bold text-blue-600 mt-1">6 วัน</p>
+              <p class="text-xs text-slate-400 mt-2">ลาป่วย 3 วัน / ลากิจ 3 วัน</p>
             </div>
           </div>
         </div>
 
-        <!-- แท็บ 2: ตารางสอน 4 ห้องเรียน (แก้ไขในตารางได้) -->
-        <div v-if="currentTab === 'schedule' || currentTab === 'dashboard'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+        <!-- แท็บ 2: ฐานข้อมูลครูผู้สอน (Teachers Directory - 25 ท่าน) -->
+        <div v-if="currentTab === 'teachers'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                <span>👨‍🏫</span>
+                <span>ฐานข้อมูลครูผู้สอนทั้งหมด (Teacher Master Directory)</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">รายชื่อครูผู้สอนและฝ่ายสนับสนุนวิชาการจากไฟล์ตารางสอนปี 2026-2027 (สามารถแก้ไขและเพิ่มข้อมูลได้)</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button @click="addTeacher" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
+                <span>+</span>
+                <span>เพิ่มครูผู้สอน</span>
+              </button>
+              <button @click="saveAllData" class="px-3.5 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
+                <span>💾</span>
+                <span>บันทึกข้อมูลครู</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-[550px] overflow-y-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead class="bg-navy-900 text-white font-bold sticky top-0 z-10">
+                <tr>
+                  <th class="py-3 px-3 w-24 text-center">รหัส (Code)</th>
+                  <th class="py-3 px-3">ชื่อครู (Name)</th>
+                  <th class="py-3 px-3">บทบาท / หน้าที่ (Role)</th>
+                  <th class="py-3 px-3">ห้องที่รับผิดชอบหลัก</th>
+                  <th class="py-3 px-3 text-center w-24">สถานะ</th>
+                  <th class="py-3 px-2 text-center w-12">ลบ</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 bg-white">
+                <tr v-for="(tItem, idx) in teacherList" :key="idx" class="hover:bg-slate-50 transition">
+                  <td class="py-2 px-3 text-center font-mono font-bold text-navy-900">
+                    <input v-model="tItem.code" @change="saveAllData" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 font-bold">
+                  </td>
+                  <td class="py-2 px-3 font-semibold text-slate-800">
+                    <input v-model="tItem.name" @change="saveAllData" class="w-full border border-slate-200 rounded px-2 py-1 font-bold">
+                  </td>
+                  <td class="py-2 px-3">
+                    <input v-model="tItem.role" @change="saveAllData" class="w-full border border-slate-200 rounded px-2 py-1 text-slate-600">
+                  </td>
+                  <td class="py-2 px-3">
+                    <input v-model="tItem.classes" @change="saveAllData" class="w-full border border-slate-200 rounded px-2 py-1 text-navy-800 font-mono">
+                  </td>
+                  <td class="py-2 px-3 text-center">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Active</span>
+                  </td>
+                  <td class="py-2 px-2 text-center">
+                    <button @click="deleteTeacher(idx)" class="text-slate-400 hover:text-rose-600 font-bold text-sm">✕</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- แท็บ 3: ฐานข้อมูลห้องเรียน (Classrooms Master - 32 ห้อง) -->
+        <div v-if="currentTab === 'classrooms'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                <span>🏫</span>
+                <span>ฐานข้อมูลห้องเรียนทั้งหมด (Classrooms Directory - 32 ห้อง)</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">รายชื่อห้องเรียน แผนก และครูผู้รับผิดชอบ (Pre-K, K1, K2, K3)</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button v-for="lvl in ['All', 'Pre-K', 'K1', 'K2', 'K3']" :key="lvl" @click="classroomFilter = lvl"
+                :class="classroomFilter === lvl ? 'bg-navy-900 text-white font-bold shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold'"
+                class="px-3 py-1.5 rounded-lg text-xs transition">
+                {{ lvl }}
+              </button>
+              <button @click="addClassroom" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 ml-2">
+                <span>+ เพิ่มห้อง</span>
+              </button>
+              <button @click="saveAllData" class="px-3.5 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow">
+                💾 บันทึก
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 max-h-[550px] overflow-y-auto pr-1">
+            <div v-for="(cItem, cIdx) in filteredClassrooms" :key="cIdx"
+                 class="p-4 rounded-xl border border-slate-200 bg-white hover:border-navy-500 shadow-2xs transition">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
+                <span class="font-bold text-sm text-navy-900">{{ cItem.name }}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-navy-50 text-navy-800">{{ cItem.level }}</span>
+              </div>
+              <div class="space-y-1.5 text-xs">
+                <div>
+                  <span class="text-slate-400 text-[11px]">ครูผู้สอนหลัก:</span>
+                  <input v-model="cItem.leadTeacher" @change="saveAllData" class="w-full border border-slate-200 rounded px-1.5 py-0.5 mt-0.5 font-bold text-slate-800">
+                </div>
+                <div>
+                  <span class="text-slate-400 text-[11px]">อาคาร / สถานที่:</span>
+                  <input v-model="cItem.building" @change="saveAllData" class="w-full border border-slate-200 rounded px-1.5 py-0.5 mt-0.5 text-slate-600">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- แท็บ 4: ตารางสอน 4 ห้องเรียน (K1.1, K1.4, K2.5, K2.6) -->
+        <div v-if="currentTab === 'schedule'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
               <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
                 <span>📅</span>
                 <span>{{ t('classroomScheduleTitle') }}</span>
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">{{ t('rotationNote') }} (สามารถคลิกแก้ไขชื่อวิชาในช่องได้ทันที)</p>
+              <p class="text-xs text-slate-500 mt-0.5">{{ t('rotationNote') }}</p>
             </div>
 
             <div class="flex items-center gap-2">
@@ -199,21 +304,20 @@
           </div>
         </div>
 
-        <!-- แท็บ 3: บันทึกแต้ม ASCEND (เพิ่ม/แก้ไข/ลบแถวได้) -->
+        <!-- แท็บ 5: บันทึกแต้ม ASCEND (28 รายการ) -->
         <div v-if="currentTab === 'profile'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h3 class="font-bold text-base text-navy-900">{{ t('ascendLogTitle') }}</h3>
-              <p class="text-xs text-slate-500">{{ t('ascendLogSubtitle') }} (แก้ไขตัวเลขและข้อความในตารางได้โดยตรง)</p>
+              <p class="text-xs text-slate-500">{{ t('ascendLogSubtitle') }}</p>
             </div>
             <div class="flex items-center gap-3">
               <button @click="addLogEntry" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
                 <span>+</span>
                 <span>เพิ่มรายการแต้ม</span>
               </button>
-              <button @click="saveAllData" class="px-3.5 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
-                <span>💾</span>
-                <span>บันทึกแต้ม</span>
+              <button @click="saveAllData" class="px-3.5 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow">
+                💾 บันทึกแต้ม
               </button>
             </div>
           </div>
@@ -245,7 +349,7 @@
                     </select>
                   </td>
                   <td class="py-2 px-3">
-                    <input v-model="log.issue_th" @change="saveAllData" class="w-full border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800" placeholder="คำอธิบายภาษาไทย">
+                    <input v-model="log.issue_th" @change="saveAllData" class="w-full border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800">
                   </td>
                   <td class="py-2 px-3 text-center">
                     <input type="number" v-model.number="log.add" @input="recalculatePoints" class="w-16 text-center font-bold text-emerald-600 border border-slate-200 rounded py-1 text-xs">
@@ -265,7 +369,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 4: คลังความคิดเห็น & สมุดพก -->
+        <!-- แท็บ 6: คลังความคิดเห็น & สมุดพก -->
         <div v-if="currentTab === 'comments'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div>
             <h3 class="font-bold text-base text-navy-900">{{ t('commentBuilderTitle') }}</h3>
@@ -321,75 +425,68 @@
           </div>
         </div>
 
-        <!-- แท็บ 5: พื้นที่ทำงานเอกสาร & ตารางบันทึกข้อมูลออนไลน์ (Interactive Sheet Grid Editor) -->
+        <!-- แท็บ 7: เอกสาร Google Sheets ทั้งหมด (เปิดในระบบและเปิดข้างนอก) -->
         <div v-if="currentTab === 'links'" class="space-y-6">
-          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
-                  <span>📑</span>
-                  <span>{{ lang === 'th' ? 'พื้นที่กรอกและบันทึกเอกสารข้อมูลในระบบ' : 'Interactive Document & Grid Editor' }}</span>
-                </h3>
-                <p class="text-xs text-slate-500 mt-0.5">{{ lang === 'th' ? 'เลือกเอกสารที่ต้องการเพื่อพิมพ์กรอกข้อมูล แก้ไข หรือเพิ่มแถวได้ทันทีในหน้านี้' : 'Select a sheet template to edit, fill data and add new records directly' }}</p>
+          <div v-if="!activeSheet" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+              <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                <span>📑</span>
+                <span>ศูนย์รวมเอกสาร Google Sheets ทุกแผ่นงาน (Spreadsheet Hub)</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">รวมไฟล์ Google Sheets ทั้ง 6 ไฟล์หลัก พร้อมแผ่นงานย่อยรวมกว่า 188 แผ่นงาน สามารถกดเข้าทำงานในระบบหรือเปิดแท็บใหม่ได้</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div v-for="item in workspaceSheets" :key="item.id"
+                   class="p-4 rounded-xl border border-slate-200 hover:border-navy-500 hover:shadow-md transition bg-slate-50/60 hover:bg-white flex items-center justify-between">
+                <div class="pr-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-navy-700 bg-navy-100 px-2 py-0.5 rounded">{{ item.category }}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">{{ item.sheetsCount }}</span>
+                  </div>
+                  <p class="text-sm font-semibold text-slate-800 mt-1">{{ item.title }}</p>
+                  <p class="text-xs text-slate-400 mt-0.5">{{ item.description }}</p>
+                </div>
+                <div class="flex flex-col gap-2 flex-shrink-0">
+                  <button @click="activeSheet = item" class="px-3 py-1 rounded text-xs font-bold bg-navy-900 text-white hover:bg-navy-800 shadow transition">
+                    เข้าทำงานในเว็บ
+                  </button>
+                  <a :href="item.url" target="_blank" class="px-3 py-1 rounded text-xs text-center font-bold bg-slate-200 hover:bg-slate-300 text-slate-700 transition">
+                    เปิดชีต ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- กรอบแสดงชีตเต็มจอในระบบ -->
+          <div v-else class="bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden flex flex-col h-[780px]">
+            <div class="bg-navy-900 text-white px-5 py-3 flex items-center justify-between shadow">
+              <div class="flex items-center gap-3">
+                <button @click="activeSheet = null" class="p-1.5 hover:bg-navy-800 rounded-md transition text-xs font-bold flex items-center gap-1 text-navy-200 hover:text-white">
+                  <span>←</span>
+                  <span>กลับหน้ารวมเอกสาร</span>
+                </button>
+                <div class="h-4 w-px bg-navy-700"></div>
+                <div>
+                  <h4 class="font-bold text-xs text-white">{{ activeSheet.title }}</h4>
+                  <span class="text-[10px] text-navy-200">{{ activeSheet.category }} • กำลังทำงานในระบบ</span>
+                </div>
               </div>
 
-              <!-- ปุ่มเลือกสลับเอกสารที่ต้องการกรอก -->
-              <div class="flex flex-wrap items-center gap-2">
-                <button v-for="sheet in gridSheets" :key="sheet.id" @click="activeGridSheetId = sheet.id"
-                  :class="activeGridSheetId === sheet.id ? 'bg-navy-900 text-white font-bold shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold'"
-                  class="px-3.5 py-1.5 rounded-lg text-xs transition">
-                  {{ sheet.title }}
+              <div class="flex items-center gap-2">
+                <a :href="activeSheet.url" target="_blank" class="px-3 py-1 bg-navy-800 hover:bg-navy-700 text-navy-100 rounded text-xs font-medium transition flex items-center gap-1">
+                  <span>เปิดแท็บใหม่ ↗</span>
+                </a>
+                <button @click="activeSheet = null" class="px-3 py-1 bg-rose-600/80 hover:bg-rose-600 text-white rounded text-xs font-bold transition">
+                  ✕ ปิดหน้าจอ
                 </button>
               </div>
             </div>
 
-            <!-- กล่องควบคุมแถวและการบันทึกข้อมูลของชีตที่เลือก -->
-            <div class="bg-navy-50/60 p-4 rounded-xl border border-navy-100 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h4 class="font-bold text-xs text-navy-900">{{ currentGridSheet.title }}</h4>
-                <p class="text-[11px] text-slate-500">{{ currentGridSheet.description }}</p>
-              </div>
-              <div class="flex items-center gap-2.5">
-                <button @click="addGridRow" class="px-3 py-1.5 bg-white border border-slate-300 hover:border-navy-500 text-navy-900 font-bold text-xs rounded-lg shadow-2xs transition flex items-center gap-1">
-                  <span>+</span>
-                  <span>{{ lang === 'th' ? 'เพิ่มแถวใหม่' : 'Add Row' }}</span>
-                </button>
-                <button @click="saveAllData" class="px-4 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5">
-                  <span>💾</span>
-                  <span>{{ lang === 'th' ? 'บันทึกข้อมูลหน้านี้' : 'Save Sheet' }}</span>
-                </button>
-              </div>
+            <div class="flex-1 bg-slate-100 relative">
+              <iframe :src="activeSheet.embedUrl" class="w-full h-full border-0" allow="autoplay"></iframe>
             </div>
-
-            <!-- ตารางกรอกข้อมูลที่แก้ไขได้จริง (Editable Data Grid) -->
-            <div class="overflow-x-auto rounded-lg border border-slate-200">
-              <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr class="bg-navy-900 text-white font-bold">
-                    <th v-for="col in currentGridSheet.columns" :key="col.key" class="py-3 px-3 text-center">
-                      {{ lang === 'th' ? col.label_th : col.label_en }}
-                    </th>
-                    <th class="py-3 px-2 text-center w-12">ลบ</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 bg-white">
-                  <tr v-for="(row, rIdx) in currentGridSheet.rows" :key="rIdx" class="hover:bg-slate-50 transition">
-                    <td v-for="col in currentGridSheet.columns" :key="col.key" class="py-2 px-2">
-                      <input v-model="row[col.key]" @change="saveAllData"
-                             :placeholder="col.label_th"
-                             class="w-full border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 focus:outline-none focus:border-navy-500 bg-slate-50/50 hover:bg-white transition">
-                    </td>
-                    <td class="py-2 px-2 text-center">
-                      <button @click="deleteGridRow(rIdx)" class="text-slate-400 hover:text-rose-600 font-bold text-sm">✕</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <p class="text-[11px] text-slate-400 text-right">
-              * ข้อมูลที่พิมพ์จะถูกบันทึกเก็บไว้ในระบบทันที ไม่สูญหายเมื่อรีเฟรชหน้าต่าง
-            </p>
           </div>
         </div>
 
@@ -406,22 +503,13 @@
         academicYear: 'ภาคเรียนที่ 1 ปีการศึกษา 2026-2027 • เด่นหล้า เพชรเกษม',
         level: 'ระดับ',
         points: 'แต้ม',
-        days: 'วัน',
-        items: 'รายการ',
         ascendPoints: 'คะแนนสะสม ASCEND',
         credits: 'เครดิตสะสม',
-        avgObserveScore: 'คะแนนสังเกตการสอนเฉลี่ย',
-        latestScore: 'การประเมินล่าสุด',
-        leaveBalance: 'สิทธิ์การลาคงเหลือ',
-        leaveDetail: 'ลาป่วย 3 วัน / ลากิจ 3 วัน',
-        termChecklist: 'ภารกิจสิ้นภาคเรียน',
-        pendingReview: 'รอยืนยันช่วงสัปดาห์สอบ',
         classroomScheduleTitle: 'ตารางสอนรายห้องเรียน',
         rotationNote: 'ดึงข้อมูลตรงจากระบบตารางเวียน 10 วัน (Odd/Even Week Rotation)',
         colDay: 'วันในสัปดาห์',
         ascendLogTitle: 'บันทึกคะแนนและการปฏิบัติงาน (ASCEND Activity Log)',
         ascendLogSubtitle: 'ดึงข้อมูลจริง 28 รายการจากระบบ Google Sheet',
-        totalEntries: 'จำนวนบันทึกทั้งหมด',
         colDate: 'วันที่',
         colType: 'ประเภทงาน',
         colReport: 'รายการบันทึก / พฤติกรรม',
@@ -445,32 +533,25 @@
         clearText: 'ล้างข้อความ',
         saveToReport: 'บันทึกลงสมุดพก',
         menuDashboard: 'แดชบอร์ดภาพรวม',
+        menuTeachers: 'ฐานข้อมูลครู (25 ท่าน)',
+        menuClassrooms: 'ฐานข้อมูลห้องเรียน (32 ห้อง)',
         menuSchedule: 'ตารางสอน 4 ห้องเรียน',
         menuProfile: 'บันทึกแต้ม ASCEND (28 รายการ)',
         menuComments: 'คลังความเห็น & สมุดพก',
-        menuLinks: 'พื้นที่กรอกเอกสาร & ชีต',
+        menuLinks: 'ศูนย์รวม Google Sheets',
       },
       en: {
         appTitle: 'School Academic System',
         academicYear: 'Academic Year 2026-2027 • Term 1 • Denla Phetkasem',
         level: 'Level',
         points: 'Points',
-        days: 'days',
-        items: 'items',
         ascendPoints: 'ASCEND Total Points',
         credits: 'ASCEND Credits',
-        avgObserveScore: 'Average Observe Score',
-        latestScore: 'Latest Score',
-        leaveBalance: 'Remaining Leave Days',
-        leaveDetail: '3 Sick / 3 Personal',
-        termChecklist: 'End of Term Tasks',
-        pendingReview: 'Awaiting end of term review',
         classroomScheduleTitle: 'Classroom Timetable',
         rotationNote: 'Synced with 10-Day Rotation Schedule (Odd/Even Week)',
         colDay: 'Day of Week',
         ascendLogTitle: 'ASCEND Activity & Points Log',
         ascendLogSubtitle: '28 Real entries synced from Google Spreadsheet',
-        totalEntries: 'Total Logs',
         colDate: 'Date',
         colType: 'Category',
         colReport: 'Report / Activity Issue',
@@ -494,10 +575,12 @@
         clearText: 'Clear Text',
         saveToReport: 'Save to Report Card',
         menuDashboard: 'Overview Dashboard',
+        menuTeachers: 'Teachers (25 Staff)',
+        menuClassrooms: 'Classrooms (32 Classes)',
         menuSchedule: 'Schedules (4 Classes)',
         menuProfile: 'ASCEND Log (28 Records)',
         menuComments: 'Comment Bank & Reports',
-        menuLinks: 'Document & Sheet Grids',
+        menuLinks: 'Spreadsheet Hub',
       }
     };
 
@@ -507,8 +590,9 @@
           lang: 'th',
           currentTab: 'dashboard',
           activeRoom: '1.1',
+          activeSheet: null,
           saveMessage: '',
-          activeGridSheetId: 'lesson_plans',
+          classroomFilter: 'All',
           teacher: {
             fullName: 'Mr. Jaun Dre Steyn (JD)',
             nickname: 'JD',
@@ -516,81 +600,140 @@
             points: 3410,
             rankLevel: 6,
             rankTitle: 'Exemplary',
-            credits: '5 Credits - Full',
-            avgScore: '95.76% (A+)',
-            leaveDays: 6
+            credits: '5 Credits - Full'
           },
           menus: [
             { id: 'dashboard', i18nKey: 'menuDashboard', icon: '📊' },
+            { id: 'teachers', i18nKey: 'menuTeachers', icon: '👨‍🏫' },
+            { id: 'classrooms', i18nKey: 'menuClassrooms', icon: '🏫' },
             { id: 'schedule', i18nKey: 'menuSchedule', icon: '📅' },
             { id: 'profile', i18nKey: 'menuProfile', icon: '🎖️' },
             { id: 'comments', i18nKey: 'menuComments', icon: '💬' },
             { id: 'links', i18nKey: 'menuLinks', icon: '📑' },
           ],
-          classrooms: [
-            { code: '1.1', name: 'ห้อง K1.1', teacher: 'Teacher JD' },
-            { code: '1.4', name: 'ห้อง K1.4', teacher: 'Teacher Dee' },
-            { code: '2.5', name: 'ห้อง K2.5', teacher: 'Teacher JD' },
-            { code: '2.6', name: 'ห้อง K2.6', teacher: 'Teacher Jenna' },
+          // ฐานข้อมูลครู 25 ท่านจากตารางสอนจริง
+          teacherList: [
+            { code: 'P1', name: 'Lilly', role: 'Primary Teacher', classes: 'PK1 Jupiter, K2.8' },
+            { code: 'P2', name: 'Cece', role: 'Primary Teacher', classes: 'PK2 Saturn, K3.6' },
+            { code: 'P3', name: 'Kate', role: 'Primary Teacher', classes: 'PK3 Uranus, K2.1' },
+            { code: 'P4', name: 'Sam', role: 'Primary Teacher', classes: 'K1.1, K2.11' },
+            { code: 'P5', name: 'Trezz', role: 'Primary Teacher', classes: 'K1.2, K2.4' },
+            { code: 'P6', name: 'Luke', role: 'Primary Teacher', classes: 'K1.8, K2.5' },
+            { code: 'P7', name: 'JD', role: 'Primary Teacher', classes: 'K1.4, K2.6' },
+            { code: 'P8', name: 'Garrett', role: 'Primary Teacher', classes: 'K1.9, K2.9' },
+            { code: 'P9', name: 'Tee', role: 'Primary Teacher', classes: 'Duty, K2.7' },
+            { code: 'P10', name: 'Mario', role: 'Primary Teacher', classes: 'K1.6, K2.10' },
+            { code: 'P11', name: 'Dee', role: 'Primary Teacher', classes: 'K1.5, K2.3' },
+            { code: 'P12', name: 'John', role: 'Primary Teacher', classes: 'K1.3, K2.2' },
+            { code: 'P13', name: 'Paul', role: 'Primary Teacher', classes: 'K1.7, K3.9' },
+            { code: 'P14', name: 'Jonny', role: 'Primary Teacher', classes: 'K3.2, K3.5' },
+            { code: 'P15', name: 'Zama', role: 'Primary Teacher', classes: 'K3.1, K3.4' },
+            { code: 'P16', name: 'Jim', role: 'Primary Teacher', classes: 'K3.3, K3.8' },
+            { code: 'P17', name: 'Joseph', role: 'Primary Teacher', classes: 'K3.10, K3.7' },
+            { code: 'P18 HT', name: 'Curtis', role: 'Head Teacher (HT)', classes: 'Academic Oversight & Duty' },
+            { code: 'LA1', name: 'Karen', role: 'Language Assistant (LA)', classes: 'PK1, K3.1, K3.3, K2.1' },
+            { code: 'LA2', name: 'Krista', role: 'Language Assistant (LA)', classes: 'PK2, K1.3, K1.5, K1.8' },
+            { code: 'LA3', name: 'Rinalyn', role: 'Language Assistant (LA)', classes: 'PK3, K1.4, K3.2, K2.3' },
+            { code: 'LA4', name: 'Pie', role: 'Language Assistant (LA)', classes: 'K1.1, K1.7, K1.9, K2.4' },
+            { code: 'LA5', name: 'Rose', role: 'Language Assistant (LA)', classes: 'K1.2, K1.6, K3.10, K2.5' },
+            { code: 'LA6', name: 'Maria', role: 'Language Assistant (LA)', classes: 'English+ Round 1 & Round 2' },
+            { code: 'LA7', name: 'Jec', role: 'Language Assistant (LA)', classes: 'Floating / Class Coverage' },
           ],
-          // ชุดข้อมูลชีตตารางที่กรอกและแก้ไขได้ในระบบ
-          gridSheets: [
+          // ฐานข้อมูลห้องเรียน 32 ห้อง
+          classroomList: [
+            { name: 'PK1 Jupiter', level: 'Pre-K', leadTeacher: 'Lilly', building: 'DIP Floor 1' },
+            { name: 'PK2 Saturn', level: 'Pre-K', leadTeacher: 'Cece', building: 'DIP Floor 1' },
+            { name: 'PK3 Uranus', level: 'Pre-K', leadTeacher: 'Kate', building: 'DIP Floor 1' },
+            { name: 'K1.1', level: 'K1', leadTeacher: 'Sam', building: 'DIP Floor 2' },
+            { name: 'K1.2', level: 'K1', leadTeacher: 'Trezz', building: 'DIP Floor 2' },
+            { name: 'K1.3', level: 'K1', leadTeacher: 'John', building: 'DIP Floor 2' },
+            { name: 'K1.4', level: 'K1', leadTeacher: 'JD', building: 'DIP Floor 2' },
+            { name: 'K1.5', level: 'K1', leadTeacher: 'Dee', building: 'DIP Floor 2' },
+            { name: 'K1.6', level: 'K1', leadTeacher: 'Mario', building: 'DIP Floor 3' },
+            { name: 'K1.7', level: 'K1', leadTeacher: 'Paul', building: 'DIP Floor 3' },
+            { name: 'K1.8', level: 'K1', leadTeacher: 'Luke', building: 'DIP Floor 3' },
+            { name: 'K1.9', level: 'K1', leadTeacher: 'Garrett', building: 'DIP Floor 3' },
+            { name: 'K2.1', level: 'K2', leadTeacher: 'Kate', building: 'Building 20 Years' },
+            { name: 'K2.2', level: 'K2', leadTeacher: 'John', building: 'Building 20 Years' },
+            { name: 'K2.3', level: 'K2', leadTeacher: 'Dee', building: 'Building 20 Years' },
+            { name: 'K2.4', level: 'K2', leadTeacher: 'Trezz', building: 'Building 20 Years' },
+            { name: 'K2.5', level: 'K2', leadTeacher: 'Luke', building: 'Building 20 Years' },
+            { name: 'K2.6', level: 'K2', leadTeacher: 'JD', building: 'Building 20 Years' },
+            { name: 'K2.7', level: 'K2', leadTeacher: 'Tee', building: 'Building 20 Years' },
+            { name: 'K2.8', level: 'K2', leadTeacher: 'Lilly', building: 'Building 20 Years' },
+            { name: 'K2.9', level: 'K2', leadTeacher: 'Garrett', building: 'Building 20 Years' },
+            { name: 'K2.10', level: 'K2', leadTeacher: 'Mario', building: 'Building 20 Years' },
+            { name: 'K3.1', level: 'K3', leadTeacher: 'Zama', building: 'DEP Building' },
+            { name: 'K3.2', level: 'K3', leadTeacher: 'Jonny', building: 'DEP Building' },
+            { name: 'K3.3', level: 'K3', leadTeacher: 'Jim', building: 'DEP Building' },
+            { name: 'K3.4', level: 'K3', leadTeacher: 'Zama', building: 'DEP Building' },
+            { name: 'K3.5', level: 'K3', leadTeacher: 'Jonny', building: 'DEP Building' },
+            { name: 'K3.6', level: 'K3', leadTeacher: 'Cece', building: 'DEP Building' },
+            { name: 'K3.7', level: 'K3', leadTeacher: 'Joseph', building: 'DEP Building' },
+            { name: 'K3.8', level: 'K3', leadTeacher: 'Jim', building: 'DEP Building' },
+            { name: 'K3.9', level: 'K3', leadTeacher: 'Paul', building: 'DEP Building' },
+            { name: 'K3.10', level: 'K3', leadTeacher: 'Joseph', building: 'DEP Building' },
+          ],
+          classrooms: [
+            { code: '1.1', name: 'ห้อง K1.1' },
+            { code: '1.4', name: 'ห้อง K1.4' },
+            { code: '2.5', name: 'ห้อง K2.5' },
+            { code: '2.6', name: 'ห้อง K2.6' },
+          ],
+          workspaceSheets: [
+            {
+              id: 'schedule_master',
+              category: 'CLASS SCHEDULE',
+              sheetsCount: '90 ชีตย่อย',
+              title: 'PHET: Class Schedules 2026-2027',
+              description: 'ตารางสอนรวมทุกระดับชั้น, วันหยุด และตารางเวรโรงเรียน',
+              url: 'https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit?rm=embedded'
+            },
+            {
+              id: 'rotation_10days',
+              category: '10-DAY ROTATION',
+              sheetsCount: '54 ชีตย่อย',
+              title: 'Phetkasem 10 days Term 1',
+              description: 'ตารางสอนหมุนเวียน 10 วัน สัปดาห์คู่/คี่ รายห้องเรียน',
+              url: 'https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit?rm=embedded'
+            },
+            {
+              id: 'academy_afterschool',
+              category: 'ACADEMY SCHEDULE',
+              sheetsCount: '11 ชีตย่อย',
+              title: '2026 After school schedule',
+              description: 'ตารางเรียนพิเศษหลังเลิกเรียน Oxford, Little Owls, Bizzy Bee',
+              url: 'https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit?rm=embedded'
+            },
             {
               id: 'lesson_plans',
-              title: 'แผนการสอน (JD-Lesson Plans)',
-              description: 'เทมเพลตแผนการจัดการเรียนรู้ 30 นาที รายสัปดาห์ (Week 0 - 19)',
-              columns: [
-                { key: 'week', label_th: 'สัปดาห์ / วัน', label_en: 'Week / Day' },
-                { key: 'time', label_th: 'ช่วงเวลา', label_en: 'Time Slot' },
-                { key: 'subject', label_th: 'รายวิชา / เนื้อหา', label_en: 'Subject / Topic' },
-                { key: 'activity', label_th: 'กิจกรรมการเรียนรู้', label_en: 'Activity Steps' },
-                { key: 'materials', label_th: 'สื่อ / อุปกรณ์', label_en: 'Materials' },
-                { key: 'status', label_th: 'สถานะส่งแผน', label_en: 'Status' }
-              ],
-              rows: [
-                { week: 'Monday Week 1', time: '08:00 - 08:30', subject: 'Computer (Phonics)', activity: 'Interactive phonics letter game on screen', materials: 'Smartboard / Worksheets', status: 'Submitted' },
-                { week: 'Monday Week 1', time: '08:30 - 09:00', subject: 'Phonics 1', activity: 'Circle time blending Aa-Zz letter sounds', materials: 'Flashcards, Song tracks', status: 'Submitted' },
-                { week: 'Tuesday Week 1', time: '10:10 - 10:40', subject: 'Science - Taste', activity: 'Taste test sweet & salty with fruits', materials: 'Bananas, Salt, Small plates', status: 'Approved' },
-                { week: 'Wednesday Week 1', time: '12:20 - 12:50', subject: 'Reading & HFW', activity: 'Guided reading high frequency words', materials: 'Storybook, Star stickers', status: 'Draft' }
-              ]
+              category: 'LESSON PLANS',
+              sheetsCount: '21 ชีตย่อย',
+              title: 'JD-Lesson Plans (DIP)',
+              description: 'แผนการจัดการเรียนรู้รายสัปดาห์ Master Week 0 - Week 19',
+              url: 'https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit?rm=embedded'
             },
             {
-              id: 'afterschool',
-              title: 'ตารางเรียนพิเศษ (After School)',
-              description: 'ตารางเรียนและรายชื่อผู้สอนคอร์ส Oxford, Little Owls, Bizzy Bee',
-              columns: [
-                { key: 'course', label_th: 'คอร์สเรียน', label_en: 'Course' },
-                { key: 'days', label_th: 'วันเรียน', label_en: 'Days' },
-                { key: 'time', label_th: 'เวลา', label_en: 'Time' },
-                { key: 'room', label_th: 'ห้องเรียน', label_en: 'Room' },
-                { key: 'teacher', label_th: 'ครูผู้สอน', label_en: 'Teacher' },
-                { key: 'students_count', label_th: 'จำนวนเด็ก', label_en: 'Students' }
-              ],
-              rows: [
-                { course: 'Oxford Round 1', days: 'M / W / F', time: '14:00 - 15:00', room: 'B204', teacher: 'Teacher JD', students_count: '12' },
-                { course: 'Oxford Round 2', days: 'M / W / F', time: '15:10 - 16:10', room: 'B204', teacher: 'Teacher JD', students_count: '10' },
-                { course: 'Little Owls Round 1', days: 'T / TH', time: '14:00 - 15:00', room: 'A113', teacher: 'Teacher Janna', students_count: '8' },
-                { course: 'Bizzy Bee Round 1', days: 'T / TH', time: '14:10 - 15:10', room: 'B202', teacher: 'Teacher Karen', students_count: '14' }
-              ]
+              id: 'comment_trackers',
+              category: 'COMMENT TRACKER',
+              sheetsCount: '4 ชีตย่อย',
+              title: 'P4 - JD - Comment Trackers',
+              description: 'คลังประโยคข้อคิดเห็นและตัวติดตามรายงานผลการเรียน',
+              url: 'https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit?rm=embedded'
             },
             {
-              id: 'speaking_test',
-              title: 'ผลสอบพูด & คำศัพท์ (Speaking & HFW)',
-              description: 'บันทึกคะแนนทดสอบ Speaking และ High Frequency Words ประจำภาคเรียน',
-              columns: [
-                { key: 'student_name', label_th: 'ชื่อนักเรียน', label_en: 'Student Name' },
-                { key: 'classroom', label_th: 'ห้อง', label_en: 'Class' },
-                { key: 'speaking_score', label_th: 'Speaking (25)', label_en: 'Speaking (25)' },
-                { key: 'hfw_score', label_th: 'HFW Words (25)', label_en: 'HFW Words (25)' },
-                { key: 'total_score', label_th: 'รวม (50)', label_en: 'Total (50)' },
-                { key: 'grade', label_th: 'เกรด', label_en: 'Grade' }
-              ],
-              rows: [
-                { student_name: 'Perkin', classroom: 'K1.1', speaking_score: '24', hfw_score: '25', total_score: '49', grade: 'A+' },
-                { student_name: 'Kin', classroom: 'K2.5', speaking_score: '25', hfw_score: '24', total_score: '49', grade: 'A+' },
-                { student_name: 'Tim', classroom: 'K1.4', speaking_score: '23', hfw_score: '23', total_score: '46', grade: 'A' },
-                { student_name: 'Arya', classroom: 'K1.4', speaking_score: '25', hfw_score: '25', total_score: '50', grade: 'A+' }
-              ]
+              id: 'speaking_hfw',
+              category: 'ASSESSMENT',
+              sheetsCount: 'ตารางคะแนน',
+              title: 'Speaking & HFW Tests (K2.6)',
+              description: 'เกณฑ์คะแนนทดสอบการพูดและคำศัพท์พื้นฐานประจำเทอม',
+              url: 'https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit?rm=embedded'
             }
           ],
           scheduleData: {
@@ -644,31 +787,31 @@
             }
           },
           ascendLogs: [
-            { date: '2026-05-11', type: 'Professionalism', add: 30, sub: 0, total: 2330, issue: 'Helping assist with schedule adjustments to ensure smooth transitions.', issue_th: 'ช่วยประสานงานปรับเปลี่ยนตารางเวลาเพื่อให้การจัดการชั้นเรียนราบรื่น' },
-            { date: '2026-05-20', type: 'Attendance', add: 50, sub: 0, total: 2380, issue: 'On-time clock-in', issue_th: 'บันทึกเวลาเข้างานตรงเวลา' },
-            { date: '2026-05-20', type: 'Professionalism', add: 50, sub: 0, total: 2430, issue: 'Organized workspace', issue_th: 'จัดพื้นที่ทำงานเป็นระเบียบเรียบร้อย' },
-            { date: '2026-06-08', type: 'Academic', add: 30, sub: 0, total: 2460, issue: 'Staying beyond required working hours to review worksheets', issue_th: 'อยู่ปฏิบัติงานเกินเวลาเพื่อตรวจทานแบบฝึกหัดของนักเรียน' },
-            { date: '2026-06-09', type: 'Professionalism', add: 30, sub: 0, total: 2490, issue: 'Going above and beyond interacting with students in Oxfords', issue_th: 'ทุ่มเทดูแลและมีปฏิสัมพันธ์กับเด็กในคลาส Oxford เกินความคาดหมาย' },
-            { date: '2026-06-18', type: 'Professionalism', add: 40, sub: 0, total: 2530, issue: 'Clean & Organized Desk', issue_th: 'โต๊ะทำงานสะอาดและเป็นระเบียบ' },
-            { date: '2026-06-18', type: 'Professionalism', add: 40, sub: 0, total: 2570, issue: 'Lesson Plan Submitted', issue_th: 'ส่งแผนการจัดการเรียนรู้ตรงเวลา' },
-            { date: '2026-06-24', type: 'Attendance', add: 100, sub: 0, total: 2670, issue: 'Clocked In On Time (7:30 AM or earlier)', issue_th: 'บันทึกเวลาเข้างานตรงเวลา (ก่อน 7:30 น.)' },
-            { date: '2026-06-24', type: 'Attendance', add: 0, sub: 10, total: 2660, issue: 'Clocked In Late (after 7:30 AM)', issue_th: 'บันทึกเวลาเข้างานสาย (หลัง 7:30 น.)' },
-            { date: '2026-06-24', type: 'Attendance', add: 0, sub: 20, total: 2640, issue: 'Missed Clock In', issue_th: 'ลืมบันทึกเวลาเข้างาน' },
-            { date: '2026-07-06', type: 'Academic', add: 40, sub: 0, total: 2680, issue: 'Oxford Reports (Early)', issue_th: 'ส่งรายงานคลาส Oxford ก่อนกำหนด' },
-            { date: '2026-07-06', type: 'Academic', add: 40, sub: 0, total: 2720, issue: 'Comment Trackers Submitted', issue_th: 'ส่งตัวติดตามความคิดเห็นนักเรียน' },
-            { date: '2026-07-06', type: 'Academic', add: 50, sub: 0, total: 2770, issue: 'Midterms Submitted (Early)', issue_th: 'ส่งรายงานผลการเรียนกลางภาคก่อนกำหนด' },
-            { date: '2026-07-06', type: 'Survey', add: 100, sub: 0, total: 2870, issue: 'Awarded for participation in ASCEND 90-Day Staff Survey', issue_th: 'เข้าร่วมทำแบบสอบถามบุคลากร ASCEND 90 วัน' },
-            { date: '2026-07-09', type: 'Professionalism', add: 60, sub: 0, total: 2930, issue: 'Clean & Organized Desk', issue_th: 'โต๊ะทำงานสะอาดและเป็นระเบียบเรียบร้อย' },
-            { date: '2026-07-09', type: 'Professionalism', add: 60, sub: 0, total: 2990, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการจัดการเรียนรู้เรียบร้อย' },
-            { date: '2026-07-16', type: 'Professionalism', add: 40, sub: 0, total: 3030, issue: 'Online Training Tech Completed', issue_th: 'ผ่านการอบรมเทคโนโลยีออนไลน์' },
-            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3045, issue: 'Clean & Organized Desk', issue_th: 'โต๊ะทำงานสะอาดเป็นระเบียบ' },
-            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3060, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการสอนเรียบร้อย' },
-            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3075, issue: 'Stand-out Participation & Engagement', issue_th: 'มีส่วนร่วมและกระตือรือร้นโดดเด่น' },
-            { date: '2026-07-22', type: 'Professionalism', add: 30, sub: 0, total: 3235, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการจัดการเรียนรู้ตรงเวลา' },
-            { date: '2026-07-22', type: 'Professionalism', add: 30, sub: 0, total: 3265, issue: 'Kids Carnival Costume Recognition', issue_th: 'ได้รับการชื่นชมการแต่งกายงาน Kids Carnival' },
-            { date: '2026-07-23', type: 'Professionalism', add: 95, sub: 0, total: 3360, issue: 'Emergency Oxford Class Coverage', issue_th: 'ช่วยสอนแทนคลาส Oxford กรณีฉุกเฉิน' },
-            { date: '2026-08-14', type: 'Professionalism', add: 25, sub: 0, total: 3385, issue: 'Clean & Organized Desk', issue_th: 'ตรวจโต๊ะทำงานสะอาดเรียบร้อย' },
-            { date: '2026-08-14', type: 'Professionalism', add: 25, sub: 0, total: 3410, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการสอนครบถ้วน' }
+            { date: '2026-05-11', type: 'Professionalism', add: 30, sub: 0, total: 2330, issue_th: 'ช่วยประสานงานปรับเปลี่ยนตารางเวลาเพื่อให้การจัดการชั้นเรียนราบรื่น' },
+            { date: '2026-05-20', type: 'Attendance', add: 50, sub: 0, total: 2380, issue_th: 'บันทึกเวลาเข้างานตรงเวลา' },
+            { date: '2026-05-20', type: 'Professionalism', add: 50, sub: 0, total: 2430, issue_th: 'จัดพื้นที่ทำงานเป็นระเบียบเรียบร้อย' },
+            { date: '2026-06-08', type: 'Academic', add: 30, sub: 0, total: 2460, issue_th: 'อยู่ปฏิบัติงานเกินเวลาเพื่อตรวจทานแบบฝึกหัดของนักเรียน' },
+            { date: '2026-06-09', type: 'Professionalism', add: 30, sub: 0, total: 2490, issue_th: 'ทุ่มเทดูแลและมีปฏิสัมพันธ์กับเด็กในคลาส Oxford เกินความคาดหมาย' },
+            { date: '2026-06-18', type: 'Professionalism', add: 40, sub: 0, total: 2530, issue_th: 'โต๊ะทำงานสะอาดและเป็นระเบียบ' },
+            { date: '2026-06-18', type: 'Professionalism', add: 40, sub: 0, total: 2570, issue_th: 'ส่งแผนการจัดการเรียนรู้ตรงเวลา' },
+            { date: '2026-06-24', type: 'Attendance', add: 100, sub: 0, total: 2670, issue_th: 'บันทึกเวลาเข้างานตรงเวลา (ก่อน 7:30 น.)' },
+            { date: '2026-06-24', type: 'Attendance', add: 0, sub: 10, total: 2660, issue_th: 'บันทึกเวลาเข้างานสาย (หลัง 7:30 น.)' },
+            { date: '2026-06-24', type: 'Attendance', add: 0, sub: 20, total: 2640, issue_th: 'ลืมบันทึกเวลาเข้างาน' },
+            { date: '2026-07-06', type: 'Academic', add: 40, sub: 0, total: 2680, issue_th: 'ส่งรายงานคลาส Oxford ก่อนกำหนด' },
+            { date: '2026-07-06', type: 'Academic', add: 40, sub: 0, total: 2720, issue_th: 'ส่งตัวติดตามความคิดเห็นนักเรียน' },
+            { date: '2026-07-06', type: 'Academic', add: 50, sub: 0, total: 2770, issue_th: 'ส่งรายงานผลการเรียนกลางภาคก่อนกำหนด' },
+            { date: '2026-07-06', type: 'Survey', add: 100, sub: 0, total: 2870, issue_th: 'เข้าร่วมทำแบบสอบถามบุคลากร ASCEND 90 วัน' },
+            { date: '2026-07-09', type: 'Professionalism', add: 60, sub: 0, total: 2930, issue_th: 'โต๊ะทำงานสะอาดและเป็นระเบียบเรียบร้อย' },
+            { date: '2026-07-09', type: 'Professionalism', add: 60, sub: 0, total: 2990, issue_th: 'ส่งแผนการจัดการเรียนรู้เรียบร้อย' },
+            { date: '2026-07-16', type: 'Professionalism', add: 40, sub: 0, total: 3030, issue_th: 'ผ่านการอบรมเทคโนโลยีออนไลน์' },
+            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3045, issue_th: 'โต๊ะทำงานสะอาดเป็นระเบียบ' },
+            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3060, issue_th: 'ส่งแผนการสอนเรียบร้อย' },
+            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3075, issue_th: 'มีส่วนร่วมและกระตือรือร้นโดดเด่น' },
+            { date: '2026-07-22', type: 'Professionalism', add: 30, sub: 0, total: 3235, issue_th: 'ส่งแผนการจัดการเรียนรู้ตรงเวลา' },
+            { date: '2026-07-22', type: 'Professionalism', add: 30, sub: 0, total: 3265, issue_th: 'ได้รับการชื่นชมการแต่งกายงาน Kids Carnival' },
+            { date: '2026-07-23', type: 'Professionalism', add: 95, sub: 0, total: 3360, issue_th: 'ช่วยสอนแทนคลาส Oxford กรณีฉุกเฉิน' },
+            { date: '2026-08-14', type: 'Professionalism', add: 25, sub: 0, total: 3385, issue_th: 'ตรวจโต๊ะทำงานสะอาดเรียบร้อย' },
+            { date: '2026-08-14', type: 'Professionalism', add: 25, sub: 0, total: 3410, issue_th: 'ส่งแผนการสอนครบถ้วน' }
           ],
           students: [
             { name: 'Perkin', class: 'K1.1', gender: 'boy' },
@@ -697,17 +840,42 @@
         currentRoomData() {
           return this.scheduleData[this.activeRoom] || this.scheduleData['1.1'];
         },
-        currentGridSheet() {
-          return this.gridSheets.find(s => s.id === this.activeGridSheetId) || this.gridSheets[0];
+        filteredClassrooms() {
+          if (this.classroomFilter === 'All') return this.classroomList;
+          return this.classroomList.filter(c => c.level === this.classroomFilter);
         }
       },
       mounted() {
-        // โหลดข้อมูลที่เคยบันทึกไว้ในเบราว์เซอร์อัตโนมัติ
         this.loadSavedData();
       },
       methods: {
         t(key) {
           return translations[this.lang][key] || key;
+        },
+        addTeacher() {
+          this.teacherList.unshift({
+            code: 'P' + (this.teacherList.length + 1),
+            name: 'New Teacher',
+            role: 'Primary Teacher',
+            classes: 'K1.1'
+          });
+          this.saveAllData();
+        },
+        deleteTeacher(idx) {
+          if (confirm('ยืนยันลบข้อมูลครูท่านนี้?')) {
+            this.teacherList.splice(idx, 1);
+            this.saveAllData();
+          }
+        },
+        addClassroom() {
+          const roomNum = this.classroomList.length + 1;
+          this.classroomList.unshift({
+            name: 'K' + roomNum,
+            level: 'K1',
+            leadTeacher: 'TBA',
+            building: 'DIP Building'
+          });
+          this.saveAllData();
         },
         addLogEntry() {
           const today = new Date().toISOString().split('T')[0];
@@ -717,7 +885,6 @@
             add: 20,
             sub: 0,
             total: this.teacher.points + 20,
-            issue: 'New logged task',
             issue_th: 'บันทึกการปฏิบัติงานใหม่'
           });
           this.recalculatePoints();
@@ -737,29 +904,16 @@
           this.teacher.points = running;
           this.saveAllData();
         },
-        addGridRow() {
-          const newRow = {};
-          this.currentGridSheet.columns.forEach(col => {
-            newRow[col.key] = '';
-          });
-          this.currentGridSheet.rows.push(newRow);
-          this.saveAllData();
-        },
-        deleteGridRow(index) {
-          if (confirm('ยืนยันลบแถวนี้?')) {
-            this.currentGridSheet.rows.splice(index, 1);
-            this.saveAllData();
-          }
-        },
         saveAllData() {
           try {
             const dataToSave = {
+              teacherList: this.teacherList,
+              classroomList: this.classroomList,
               scheduleData: this.scheduleData,
               ascendLogs: this.ascendLogs,
-              gridSheets: this.gridSheets,
               teacher: this.teacher
             };
-            localStorage.setItem('ascend_saved_system_data', JSON.stringify(dataToSave));
+            localStorage.setItem('ascend_full_data_v2', JSON.stringify(dataToSave));
             this.saveMessage = '✓ บันทึกข้อมูลสำเร็จ';
             setTimeout(() => { this.saveMessage = ''; }, 2500);
           } catch (e) {
@@ -768,12 +922,13 @@
         },
         loadSavedData() {
           try {
-            const saved = localStorage.getItem('ascend_saved_system_data');
+            const saved = localStorage.getItem('ascend_full_data_v2');
             if (saved) {
               const parsed = JSON.parse(saved);
+              if (parsed.teacherList) this.teacherList = parsed.teacherList;
+              if (parsed.classroomList) this.classroomList = parsed.classroomList;
               if (parsed.scheduleData) this.scheduleData = parsed.scheduleData;
               if (parsed.ascendLogs) this.ascendLogs = parsed.ascendLogs;
-              if (parsed.gridSheets) this.gridSheets = parsed.gridSheets;
               if (parsed.teacher) this.teacher = parsed.teacher;
             }
           } catch (e) {
