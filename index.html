@@ -10,7 +10,6 @@
       theme: {
         extend: {
           colors: {
-            // โทนสีกรมท่าเข้มตามตัวอย่างภาพ (#152f4f)
             navy: {
               50: '#f0f4f9',
               100: '#dce5f1',
@@ -48,7 +47,6 @@
           </div>
         </div>
 
-        <!-- รายการเมนูหลัก -->
         <nav class="p-3 space-y-1">
           <button v-for="menu in menus" :key="menu.id" @click="currentTab = menu.id"
             :class="currentTab === menu.id ? 'bg-white text-navy-900 font-bold shadow-sm' : 'hover:bg-navy-800/80 text-slate-200 font-normal'"
@@ -59,7 +57,6 @@
         </nav>
       </div>
 
-      <!-- ข้อมูลผู้ใช้งานด้านล่าง -->
       <div class="p-4 border-t border-navy-800 text-xs text-navy-200 bg-navy-950/50">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-full bg-white text-navy-900 flex items-center justify-center font-bold shadow">
@@ -73,10 +70,10 @@
       </div>
     </aside>
 
-    <!-- พื้นที่เนื้อหาหลัก โทนขาว-เทาสว่าง สะอาดตา -->
+    <!-- พื้นที่เนื้อหาหลัก -->
     <main class="flex-1 flex flex-col overflow-y-auto bg-slate-50">
       
-      <!-- Topbar สีขาว ขอบสีกรมอ่อน พร้อมปุ่มสลับภาษา -->
+      <!-- Topbar แถบบน -->
       <header class="bg-white border-b border-slate-200 px-8 py-3.5 flex items-center justify-between shadow-sm sticky top-0 z-10">
         <div>
           <h2 class="text-lg font-bold text-navy-900">{{ currentTabTitle }}</h2>
@@ -96,13 +93,12 @@
             </button>
           </div>
 
-          <!-- ป้ายคะแนน ASCEND โทนสีกรมท่า -->
           <div class="text-right pl-4 border-l border-slate-200">
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-navy-50 text-navy-900 border border-navy-200">
               <span>{{ teacher.rankTitle }}</span>
               <span>({{ t('level') }} {{ teacher.rankLevel }})</span>
             </div>
-            <p class="text-xs font-semibold text-slate-600 mt-1">{{ teacher.points.toLocaleString() }} {{ t('points') }} ({{ t('needPoints') }} {{ teacher.pointsUntilNext }} {{ t('toElite') }})</p>
+            <p class="text-xs font-semibold text-slate-600 mt-1">{{ teacher.points.toLocaleString() }} {{ t('points') }}</p>
           </div>
         </div>
       </header>
@@ -124,7 +120,7 @@
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <p class="text-xs text-slate-500 font-medium">{{ t('avgObserveScore') }}</p>
               <p class="text-3xl font-bold text-emerald-600 mt-1">{{ teacher.avgScore }}</p>
-              <p class="text-xs text-slate-400 mt-2">{{ t('latestScore') }}: 55/55 A+ (FO-98%)</p>
+              <p class="text-xs text-slate-400 mt-2">{{ t('latestScore') }}: 55/55 A+</p>
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -141,18 +137,17 @@
           </div>
         </div>
 
-        <!-- แท็บ 2: ตารางสอน 4 ห้องเรียน (K1.1, K1.4, K2.5, K2.6) -->
+        <!-- แท็บ 2: ตารางสอน 4 ห้องเรียน -->
         <div v-if="currentTab === 'schedule' || currentTab === 'dashboard'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
               <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
                 <span>📅</span>
-                <span>{{ t('classroomScheduleTitle') }} (4 ห้องเรียนตัวอย่าง)</span>
+                <span>{{ t('classroomScheduleTitle') }}</span>
               </h3>
               <p class="text-xs text-slate-500 mt-0.5">{{ t('rotationNote') }}</p>
             </div>
 
-            <!-- ปุ่มเลือกดูห้องเรียน -->
             <div class="flex items-center gap-2">
               <button v-for="rm in classrooms" :key="rm.code" @click="activeRoom = rm.code"
                 :class="activeRoom === rm.code ? 'bg-navy-900 text-white font-bold shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold'"
@@ -162,14 +157,13 @@
             </div>
           </div>
 
-          <!-- ตารางแสดงคาบเรียนของห้องที่เลือก -->
           <div class="overflow-x-auto">
-            <div class="bg-navy-50/50 p-4 rounded-lg border border-navy-100 mb-4 flex items-center justify-between">
+            <div class="bg-navy-50/50 p-3.5 rounded-lg border border-navy-100 mb-4 flex items-center justify-between">
               <div>
-                <span class="text-xs font-bold text-navy-900 px-2 py-0.5 bg-navy-100 rounded">ห้องเรียน {{ currentRoomData.code }}</span>
-                <span class="text-xs text-slate-600 ml-2 font-medium">ครูประจำชั้น/ผู้สอน: <strong class="text-navy-900">{{ currentRoomData.teacher }}</strong></span>
+                <span class="text-xs font-bold text-navy-900 px-2 py-0.5 bg-navy-100 rounded">ห้อง {{ currentRoomData.code }}</span>
+                <span class="text-xs text-slate-600 ml-2 font-medium">ครูผู้สอน: <strong class="text-navy-900">{{ currentRoomData.teacher }}</strong></span>
               </div>
-              <span class="text-xs text-slate-500 font-mono">อาคารเรียนเด่นหล้า เพชรเกษม</span>
+              <span class="text-xs text-slate-500">เด่นหล้า เพชรเกษม</span>
             </div>
 
             <table class="w-full text-left text-xs border-collapse">
@@ -198,7 +192,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 3: บันทึกแต้ม ASCEND (28 รายการจริง) -->
+        <!-- แท็บ 3: บันทึกแต้ม ASCEND (28 รายการ) -->
         <div v-if="currentTab === 'profile'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
@@ -296,68 +290,69 @@
           </div>
         </div>
 
-        <!-- แท็บ 5: ลิงก์เอกสาร Extra Links ทั้งหมด -->
-        <div v-if="currentTab === 'links'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
-          <div class="border-b border-slate-100 pb-4">
-            <h3 class="font-bold text-base text-navy-900">🔗 {{ lang === 'th' ? 'ลิงก์และเอกสารที่เกี่ยวข้อง' : 'Extra Links & Resources' }}</h3>
-            <p class="text-xs text-slate-500">{{ lang === 'th' ? 'รวมลิงก์ไปยัง Google Sheets ทั้งหมดของโรงเรียนเด่นหล้า เพชรเกษม' : 'Direct links to official spreadsheets' }}</p>
+        <!-- แท็บ 5: พื้นที่ทำงานเอกสารชีตในระบบ (Workspaces & Sheet Editors) -->
+        <div v-if="currentTab === 'links'" class="space-y-6">
+          
+          <!-- เมื่อยังไม่ได้เลือกชีต: แสดงการ์ด 6 ใบพร้อมปุ่ม "เปิดทำงานในระบบ" -->
+          <div v-if="!activeSheet" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+              <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                <span>📑</span>
+                <span>{{ lang === 'th' ? 'พื้นที่ทำงานเอกสารและชีตออนไลน์' : 'Workspace & Online Spreadsheets' }}</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">{{ lang === 'th' ? 'เลือกเอกสารที่ต้องการเปิดทำงาน จัดการ และบันทึกข้อมูลได้โดยตรงในระบบ' : 'Click any document below to open and work directly inside the system' }}</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div v-for="item in workspaceSheets" :key="item.id"
+                   @click="openWorkspace(item)"
+                   class="p-4 rounded-xl border border-slate-200 hover:border-navy-500 hover:shadow-md transition bg-slate-50/60 hover:bg-white cursor-pointer group flex items-center justify-between">
+                <div class="pr-3">
+                  <p class="text-[11px] font-bold text-navy-700 uppercase tracking-wider">{{ item.category }}</p>
+                  <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">{{ item.title }}</p>
+                  <p class="text-xs text-slate-400 mt-1">{{ item.description }}</p>
+                </div>
+                <button class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-navy-900 text-white group-hover:bg-navy-800 shadow transition flex-shrink-0 flex items-center gap-1.5">
+                  <span>{{ lang === 'th' ? 'เข้าทำงาน' : 'Open' }}</span>
+                  <span>➜</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a href="https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit" target="_blank"
-               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
-              <div>
-                <p class="text-xs font-bold text-navy-700 uppercase">Class Schedule</p>
-                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">PHET: Class Schedules 2025-2026</p>
+          <!-- เมื่อคลิกเลือกชีต: แสดงหน้าจอทำงานในระบบ (Interactive Workspace Viewer) -->
+          <div v-else class="bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden flex flex-col h-[780px]">
+            <!-- แถบเมนูด้านบนของพื้นที่ทำงาน -->
+            <div class="bg-navy-900 text-white px-5 py-3 flex items-center justify-between shadow">
+              <div class="flex items-center gap-3">
+                <button @click="activeSheet = null" class="p-1.5 hover:bg-navy-800 rounded-md transition text-xs font-bold flex items-center gap-1 text-navy-200 hover:text-white">
+                  <span>←</span>
+                  <span>{{ lang === 'th' ? 'กลับหน้ารวมเอกสาร' : 'Back to List' }}</span>
+                </button>
+                <div class="h-4 w-px bg-navy-700"></div>
+                <div>
+                  <h4 class="font-bold text-xs text-white">{{ activeSheet.title }}</h4>
+                  <span class="text-[10px] text-navy-200">{{ activeSheet.category }} • {{ lang === 'th' ? 'กำลังทำงานในระบบ' : 'Active In-System Workspace' }}</span>
+                </div>
               </div>
-              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
-            </a>
 
-            <a href="https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit" target="_blank"
-               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
-              <div>
-                <p class="text-xs font-bold text-navy-700 uppercase">10-Day Rotation</p>
-                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">Phetkasem 10 days Term 1</p>
+              <!-- ปุ่มเครื่องมือเสริม -->
+              <div class="flex items-center gap-2">
+                <a :href="activeSheet.url" target="_blank" class="px-3 py-1 bg-navy-800 hover:bg-navy-700 text-navy-100 rounded text-xs font-medium transition flex items-center gap-1">
+                  <span>เปิดแท็บใหม่ ↗</span>
+                </a>
+                <button @click="activeSheet = null" class="px-3 py-1 bg-rose-600/80 hover:bg-rose-600 text-white rounded text-xs font-bold transition">
+                  ✕ ปิดหน้าจอ
+                </button>
               </div>
-              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
-            </a>
+            </div>
 
-            <a href="https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit" target="_blank"
-               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
-              <div>
-                <p class="text-xs font-bold text-navy-700 uppercase">Academy Schedule</p>
-                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">2025 After school schedule</p>
-              </div>
-              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
-            </a>
-
-            <a href="https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit" target="_blank"
-               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
-              <div>
-                <p class="text-xs font-bold text-navy-700 uppercase">Lesson Plans</p>
-                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">JD-Lesson Plans (DIP)</p>
-              </div>
-              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
-            </a>
-
-            <a href="https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit" target="_blank"
-               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
-              <div>
-                <p class="text-xs font-bold text-navy-700 uppercase">Comment Tracker</p>
-                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">P4 - JD - Comment Trackers</p>
-              </div>
-              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
-            </a>
-
-            <a href="https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit" target="_blank"
-               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
-              <div>
-                <p class="text-xs font-bold text-navy-700 uppercase">Assessment</p>
-                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">Speaking & HFW Tests (K2.6)</p>
-              </div>
-              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
-            </a>
+            <!-- ส่วนฝังชีตสำหรับทำงานโดยตรง (Interactive Iframe View) -->
+            <div class="flex-1 bg-slate-100 relative">
+              <iframe :src="activeSheet.embedUrl" class="w-full h-full border-0" allow="autoplay"></iframe>
+            </div>
           </div>
+
         </div>
 
       </div>
@@ -373,8 +368,6 @@
         academicYear: 'ภาคเรียนที่ 1 ปีการศึกษา 2026-2027 • เด่นหล้า เพชรเกษม',
         level: 'ระดับ',
         points: 'แต้ม',
-        needPoints: 'ต้องการอีก',
-        toElite: 'สู่ระดับ Elite',
         days: 'วัน',
         items: 'รายการ',
         ascendPoints: 'คะแนนสะสม ASCEND',
@@ -417,15 +410,13 @@
         menuSchedule: 'ตารางสอน 4 ห้องเรียน',
         menuProfile: 'บันทึกแต้ม ASCEND (28 รายการ)',
         menuComments: 'คลังความเห็น & สมุดพก',
-        menuLinks: 'ลิงก์เอกสาร Google Sheets',
+        menuLinks: 'พื้นที่ทำงานเอกสาร & ชีต',
       },
       en: {
         appTitle: 'School Academic System',
         academicYear: 'Academic Year 2026-2027 • Term 1 • Denla Phetkasem',
         level: 'Level',
         points: 'Points',
-        needPoints: 'Need',
-        toElite: 'points to Elite',
         days: 'days',
         items: 'items',
         ascendPoints: 'ASCEND Total Points',
@@ -468,7 +459,7 @@
         menuSchedule: 'Schedules (4 Classes)',
         menuProfile: 'ASCEND Log (28 Records)',
         menuComments: 'Comment Bank & Reports',
-        menuLinks: 'Google Sheets Links',
+        menuLinks: 'Workspaces & Spreadsheets',
       }
     };
 
@@ -478,6 +469,7 @@
           lang: 'th',
           currentTab: 'dashboard',
           activeRoom: '1.1',
+          activeSheet: null,
           teacher: {
             fullName: 'Mr. Jaun Dre Steyn (JD)',
             nickname: 'JD',
@@ -485,7 +477,6 @@
             points: 3410,
             rankLevel: 6,
             rankTitle: 'Exemplary',
-            pointsUntilNext: 590,
             credits: '5 Credits - Full',
             avgScore: '95.76% (A+)',
             leaveDays: 6
@@ -495,7 +486,57 @@
             { id: 'schedule', i18nKey: 'menuSchedule', icon: '📅' },
             { id: 'profile', i18nKey: 'menuProfile', icon: '🎖️' },
             { id: 'comments', i18nKey: 'menuComments', icon: '💬' },
-            { id: 'links', i18nKey: 'menuLinks', icon: '🔗' },
+            { id: 'links', i18nKey: 'menuLinks', icon: '📑' },
+          ],
+          workspaceSheets: [
+            {
+              id: 'schedule_master',
+              category: 'CLASS SCHEDULE',
+              title: 'PHET: Class Schedules 2025-2026',
+              description: 'ตารางสอนรวมทุกระดับชั้นและกิจกรรมโรงเรียน',
+              url: 'https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit?rm=embedded'
+            },
+            {
+              id: 'rotation_10days',
+              category: '10-DAY ROTATION',
+              title: 'Phetkasem 10 days Term 1; 2025-2026',
+              description: 'ตารางเวียน 10 วัน สัปดาห์คู่และสัปดาห์คี่',
+              url: 'https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit?rm=embedded'
+            },
+            {
+              id: 'academy_afterschool',
+              category: 'ACADEMY SCHEDULE',
+              title: '2025 After school schedule',
+              description: 'ตารางเรียนพิเศษหลังเลิกเรียน Oxford, Little Owls, Bizzy Bee',
+              url: 'https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit?rm=embedded'
+            },
+            {
+              id: 'lesson_plans',
+              category: 'LESSON PLANS',
+              title: 'JD-Lesson Plans (DIP)',
+              description: 'แผนการจัดการเรียนรู้รายสัปดาห์ Week 0 - Week 19',
+              url: 'https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit?rm=embedded'
+            },
+            {
+              id: 'comment_trackers',
+              category: 'COMMENT TRACKER',
+              title: 'P4 - JD - Comment Trackers',
+              description: 'ตัวติดตามข้อคิดเห็นรายงานผลการเรียนรายบุคคล',
+              url: 'https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit?rm=embedded'
+            },
+            {
+              id: 'speaking_hfw',
+              category: 'ASSESSMENT',
+              title: 'Speaking & HFW Tests Scoresheets (K2.6)',
+              description: 'เกณฑ์คะแนนทดสอบการพูดและคำศัพท์พื้นฐาน',
+              url: 'https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit',
+              embedUrl: 'https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit?rm=embedded'
+            }
           ],
           classrooms: [
             { code: '1.1', name: 'ห้อง K1.1', teacher: 'Teacher JD' },
@@ -783,6 +824,9 @@
       methods: {
         t(key) {
           return translations[this.lang][key] || key;
+        },
+        openWorkspace(sheetItem) {
+          this.activeSheet = sheetItem;
         },
         previewSentence(text) {
           if (!this.selectedStudent) return text;
