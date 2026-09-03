@@ -5,32 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ASCEND Portal - School Academic & Teacher Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // โทนสีกรมท่าเข้มตามตัวอย่างภาพ (#152f4f)
+            navy: {
+              50: '#f0f4f9',
+              100: '#dce5f1',
+              200: '#bccfe5',
+              300: '#92b2d3',
+              400: '#618ebe',
+              500: '#3d6ea8',
+              600: '#2b548b',
+              700: '#22436f',
+              800: '#1e385c',
+              900: '#152f4f',
+              950: '#0d1d33',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Sarabun', 'Inter', sans-serif; }
-  </style>
+  <style> body { font-family: 'Sarabun', 'Inter', sans-serif; } </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body class="bg-slate-100 text-slate-800 antialiased">
   <div id="app" class="flex h-screen overflow-hidden">
     
-    <!-- แถบเมนูด้านข้าง (Sidebar) -->
-    <aside class="w-64 bg-slate-900 text-slate-200 flex flex-col justify-between shadow-2xl flex-shrink-0">
+    <!-- แถบเมนูด้านข้าง โทนสีกรมท่าเข้ม #152f4f -->
+    <aside class="w-64 bg-navy-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 border-r border-navy-800">
       <div>
-        <!-- ส่วนหัวแสดงโลโก้จริง -->
-        <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+        <div class="p-5 border-b border-navy-800 flex items-center gap-3 bg-navy-950/40">
           <img src="logo.png" alt="Logo" class="w-10 h-10 object-contain rounded-lg bg-white p-1 shadow-md" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-          <div style="display:none;" class="w-10 h-10 bg-amber-500 rounded-lg items-center justify-center font-bold text-slate-950 text-xl shadow">A</div>
+          <div style="display:none;" class="w-10 h-10 bg-white text-navy-900 rounded-lg items-center justify-center font-bold text-xl shadow">A</div>
           <div>
-            <h1 class="font-bold text-sm text-white tracking-wide leading-tight">{{ t('appTitle') }}</h1>
-            <p class="text-xs text-amber-400 font-medium">ASCEND Portal</p>
+            <h1 class="font-bold text-sm tracking-wide leading-tight text-white">{{ t('appTitle') }}</h1>
+            <p class="text-xs text-navy-200 font-medium">ASCEND Education</p>
           </div>
         </div>
 
         <!-- รายการเมนูหลัก -->
         <nav class="p-3 space-y-1">
           <button v-for="menu in menus" :key="menu.id" @click="currentTab = menu.id"
-            :class="currentTab === menu.id ? 'bg-amber-500/20 text-amber-400 font-semibold border-r-4 border-amber-400' : 'hover:bg-slate-800/70 text-slate-300 font-normal'"
+            :class="currentTab === menu.id ? 'bg-white text-navy-900 font-bold shadow-sm' : 'hover:bg-navy-800/80 text-slate-200 font-normal'"
             class="w-full text-left px-3.5 py-2.5 rounded-lg flex items-center gap-3 transition text-sm">
             <span class="text-base">{{ menu.icon }}</span>
             <span>{{ t(menu.i18nKey) }}</span>
@@ -38,46 +59,46 @@
         </nav>
       </div>
 
-      <!-- ข้อมูลผู้ใช้ด้านล่าง -->
-      <div class="p-4 border-t border-slate-800 text-xs text-slate-400 bg-slate-950/40">
+      <!-- ข้อมูลผู้ใช้งานด้านล่าง -->
+      <div class="p-4 border-t border-navy-800 text-xs text-navy-200 bg-navy-950/50">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center font-bold shadow">
+          <div class="w-9 h-9 rounded-full bg-white text-navy-900 flex items-center justify-center font-bold shadow">
             {{ teacher.nickname }}
           </div>
           <div class="overflow-hidden">
             <p class="font-semibold text-white truncate">{{ teacher.fullName }}</p>
-            <p class="text-[11px] text-slate-400 truncate">{{ teacher.school }}</p>
+            <p class="text-[11px] text-navy-300 truncate">{{ teacher.school }}</p>
           </div>
         </div>
       </div>
     </aside>
 
-    <!-- พื้นที่แสดงผลเนื้อหาหลัก (Main Area) -->
-    <main class="flex-1 flex flex-col overflow-y-auto">
+    <!-- พื้นที่เนื้อหาหลัก โทนขาว-เทาสว่าง สะอาดตา -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-slate-50">
       
-      <!-- Topbar แถบบนพร้อมปุ่มสลับภาษา TH / EN -->
+      <!-- Topbar สีขาว ขอบสีกรมอ่อน พร้อมปุ่มสลับภาษา -->
       <header class="bg-white border-b border-slate-200 px-8 py-3.5 flex items-center justify-between shadow-sm sticky top-0 z-10">
         <div>
-          <h2 class="text-lg font-bold text-slate-800">{{ currentTabTitle }}</h2>
+          <h2 class="text-lg font-bold text-navy-900">{{ currentTabTitle }}</h2>
           <p class="text-xs text-slate-400 font-medium">{{ t('academicYear') }}</p>
         </div>
 
         <div class="flex items-center gap-5">
           <!-- ปุ่มสลับภาษา TH / EN -->
-          <div class="inline-flex bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner">
-            <button @click="lang = 'th'" :class="lang === 'th' ? 'bg-white text-slate-900 shadow font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'" class="px-3 py-1 text-xs rounded-md transition flex items-center gap-1.5">
+          <div class="inline-flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <button @click="lang = 'th'" :class="lang === 'th' ? 'bg-navy-900 text-white shadow font-bold' : 'text-slate-600 hover:text-navy-900 font-medium'" class="px-3 py-1 text-xs rounded-md transition flex items-center gap-1.5">
               <span>🇹🇭</span>
               <span>ภาษาไทย</span>
             </button>
-            <button @click="lang = 'en'" :class="lang === 'en' ? 'bg-white text-slate-900 shadow font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'" class="px-3 py-1 text-xs rounded-md transition flex items-center gap-1.5">
+            <button @click="lang = 'en'" :class="lang === 'en' ? 'bg-navy-900 text-white shadow font-bold' : 'text-slate-600 hover:text-navy-900 font-medium'" class="px-3 py-1 text-xs rounded-md transition flex items-center gap-1.5">
               <span>🇬🇧</span>
               <span>English</span>
             </button>
           </div>
 
-          <!-- ป้ายแสดงคะแนน ASCEND -->
-          <div class="text-right pl-3 border-l border-slate-200">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+          <!-- ป้ายคะแนน ASCEND โทนสีกรมท่า -->
+          <div class="text-right pl-4 border-l border-slate-200">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-navy-50 text-navy-900 border border-navy-200">
               <span>{{ teacher.rankTitle }}</span>
               <span>({{ t('level') }} {{ teacher.rankLevel }})</span>
             </div>
@@ -86,125 +107,156 @@
         </div>
       </header>
 
-      <!-- พื้นที่เนื้อหาแต่ละแท็บ -->
       <div class="p-8 space-y-6">
 
-        <!-- แท็บ 1: แดชบอร์ดภาพรวม (Overview Dashboard) -->
+        <!-- แท็บ 1: แดชบอร์ดภาพรวม -->
         <div v-if="currentTab === 'dashboard'" class="space-y-6">
-          <!-- การ์ด 4 ช่องด้านบน -->
           <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <p class="text-xs text-slate-500 font-medium">{{ t('ascendPoints') }}</p>
-              <p class="text-3xl font-bold text-amber-600 mt-1">{{ teacher.points.toLocaleString() }}</p>
+              <p class="text-3xl font-bold text-navy-900 mt-1">{{ teacher.points.toLocaleString() }}</p>
               <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
-                <div class="bg-amber-500 h-full rounded-full transition-all" :style="{ width: (teacher.points / 4000 * 100) + '%' }"></div>
+                <div class="bg-navy-900 h-full rounded-full transition-all" :style="{ width: (teacher.points / 4000 * 100) + '%' }"></div>
               </div>
               <p class="text-[11px] text-slate-400 mt-2">{{ t('credits') }}: {{ teacher.credits }}</p>
             </div>
 
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <p class="text-xs text-slate-500 font-medium">{{ t('avgObserveScore') }}</p>
               <p class="text-3xl font-bold text-emerald-600 mt-1">{{ teacher.avgScore }}</p>
               <p class="text-xs text-slate-400 mt-2">{{ t('latestScore') }}: 55/55 A+ (FO-98%)</p>
             </div>
 
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <p class="text-xs text-slate-500 font-medium">{{ t('leaveBalance') }}</p>
-              <p class="text-3xl font-bold text-blue-600 mt-1">6 {{ t('days') }}</p>
+              <p class="text-3xl font-bold text-navy-700 mt-1">6 {{ t('days') }}</p>
               <p class="text-xs text-slate-400 mt-2">{{ t('leaveDetail') }}</p>
             </div>
 
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <p class="text-xs text-slate-500 font-medium">{{ t('termChecklist') }}</p>
-              <p class="text-3xl font-bold text-indigo-600 mt-1">0 / 6 {{ t('items') }}</p>
+              <p class="text-3xl font-bold text-slate-700 mt-1">0 / 6 {{ t('items') }}</p>
               <p class="text-xs text-slate-400 mt-2">{{ t('pendingReview') }}</p>
-            </div>
-          </div>
-
-          <!-- ตารางสอนวันนี้ -->
-          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                <span>📅</span>
-                <span>{{ t('todaySchedule') }}</span>
-              </h3>
-              <span class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">{{ teacher.school }}</span>
-            </div>
-            <div class="divide-y divide-slate-100">
-              <div v-for="item in todaySchedule" :key="item.time" class="py-3.5 flex items-center justify-between text-sm">
-                <div class="w-36 font-mono text-xs text-slate-500 font-bold">{{ item.time }}</div>
-                <div class="flex-1 font-semibold text-slate-800">{{ lang === 'th' ? item.subject_th : item.subject_en }}</div>
-                <div class="w-28 text-xs px-2.5 py-1 rounded bg-slate-100 text-slate-600 text-center font-medium">{{ item.room }}</div>
-                <div class="w-32 text-right">
-                  <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="item.badgeClass">
-                    {{ lang === 'th' ? item.badge_th : item.badge_en }}
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
-        <!-- แท็บ 2: ประวัติแต้ม ASCEND (ดึงข้อมูลจริงครบ 28 รายการ) -->
-        <div v-if="currentTab === 'profile'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <!-- แท็บ 2: ตารางสอน 4 ห้องเรียน (K1.1, K1.4, K2.5, K2.6) -->
+        <div v-if="currentTab === 'schedule' || currentTab === 'dashboard'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
-              <h3 class="font-bold text-base text-slate-800">{{ t('ascendLogTitle') }}</h3>
-              <p class="text-xs text-slate-500">{{ t('ascendLogSubtitle') }}</p>
+              <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                <span>📅</span>
+                <span>{{ t('classroomScheduleTitle') }} (4 ห้องเรียนตัวอย่าง)</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">{{ t('rotationNote') }}</p>
             </div>
-            <div class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg text-slate-600 font-semibold">
-              {{ t('totalEntries') }}: {{ ascendLogs.length }} {{ t('items') }}
+
+            <!-- ปุ่มเลือกดูห้องเรียน -->
+            <div class="flex items-center gap-2">
+              <button v-for="rm in classrooms" :key="rm.code" @click="activeRoom = rm.code"
+                :class="activeRoom === rm.code ? 'bg-navy-900 text-white font-bold shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold'"
+                class="px-4 py-1.5 rounded-lg text-xs transition">
+                {{ rm.name }}
+              </button>
             </div>
           </div>
 
+          <!-- ตารางแสดงคาบเรียนของห้องที่เลือก -->
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-                <tr>
-                  <th class="py-3 px-4">{{ t('colDate') }}</th>
-                  <th class="py-3 px-4">{{ t('colType') }}</th>
-                  <th class="py-3 px-4">{{ t('colReport') }}</th>
-                  <th class="py-3 px-4 text-center">{{ t('colAdd') }}</th>
-                  <th class="py-3 px-4 text-center">{{ t('colSub') }}</th>
-                  <th class="py-3 px-4 text-right">{{ t('colTotal') }}</th>
+            <div class="bg-navy-50/50 p-4 rounded-lg border border-navy-100 mb-4 flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-navy-900 px-2 py-0.5 bg-navy-100 rounded">ห้องเรียน {{ currentRoomData.code }}</span>
+                <span class="text-xs text-slate-600 ml-2 font-medium">ครูประจำชั้น/ผู้สอน: <strong class="text-navy-900">{{ currentRoomData.teacher }}</strong></span>
+              </div>
+              <span class="text-xs text-slate-500 font-mono">อาคารเรียนเด่นหล้า เพชรเกษม</span>
+            </div>
+
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-navy-900 text-white font-bold">
+                  <th class="py-3 px-4 rounded-l-lg">{{ t('colDay') }}</th>
+                  <th v-for="time in currentRoomData.timeSlots" :key="time" class="py-3 px-4 text-center font-mono">
+                    {{ time }}
+                  </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr v-for="(log, i) in ascendLogs" :key="i" class="hover:bg-slate-50/70 transition">
-                  <td class="py-3 px-4 font-mono font-medium text-slate-500">{{ log.date }}</td>
-                  <td class="py-3 px-4">
-                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold"
-                      :class="log.type.includes('Attendance') ? 'bg-blue-50 text-blue-700' : (log.type.includes('Academic') ? 'bg-emerald-50 text-emerald-700' : 'bg-purple-50 text-purple-700')">
-                      {{ log.type }}
-                    </span>
+              <tbody class="divide-y divide-slate-200 bg-white">
+                <tr v-for="d in currentRoomData.days" :key="d.day" class="hover:bg-slate-50 transition">
+                  <td class="py-3.5 px-4 font-bold text-navy-900 bg-slate-50/70 border-r border-slate-100 w-32">
+                    {{ lang === 'th' ? d.day_th : d.day_en }}
                   </td>
-                  <td class="py-3 px-4 font-medium text-slate-800">{{ lang === 'th' ? log.issue_th : log.issue }}</td>
-                  <td class="py-3 px-4 text-center font-bold text-emerald-600">{{ log.add ? '+' + log.add : '-' }}</td>
-                  <td class="py-3 px-4 text-center font-bold text-rose-600">{{ log.sub ? '-' + log.sub : '-' }}</td>
-                  <td class="py-3 px-4 text-right font-bold font-mono text-slate-700">{{ log.total.toLocaleString() }}</td>
+                  <td v-for="(subj, idx) in d.slots" :key="idx" class="py-3.5 px-3 text-center">
+                    <div class="p-2 rounded border border-slate-100 bg-slate-50 hover:border-navy-300 transition">
+                      <p class="font-bold text-slate-800">{{ lang === 'th' ? subj.th : subj.en }}</p>
+                      <span class="text-[10px] text-slate-400 mt-0.5 block font-mono">{{ subj.type }}</span>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- แท็บ 3: คลังความคิดเห็น & เครื่องมือจัดทำสมุดพก (Comment Builder) -->
+        <!-- แท็บ 3: บันทึกแต้ม ASCEND (28 รายการจริง) -->
+        <div v-if="currentTab === 'profile'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="font-bold text-base text-navy-900">{{ t('ascendLogTitle') }}</h3>
+              <p class="text-xs text-slate-500">{{ t('ascendLogSubtitle') }}</p>
+            </div>
+            <div class="text-xs bg-navy-50 text-navy-900 px-3 py-1.5 rounded-lg font-bold border border-navy-200">
+              {{ t('totalEntries') }}: {{ ascendLogs.length }} {{ t('items') }}
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-navy-900 text-white font-bold">
+                <tr>
+                  <th class="py-3 px-4 rounded-l-lg">{{ t('colDate') }}</th>
+                  <th class="py-3 px-4">{{ t('colType') }}</th>
+                  <th class="py-3 px-4">{{ t('colReport') }}</th>
+                  <th class="py-3 px-4 text-center">{{ t('colAdd') }}</th>
+                  <th class="py-3 px-4 text-center">{{ t('colSub') }}</th>
+                  <th class="py-3 px-4 text-right rounded-r-lg">{{ t('colTotal') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 bg-white">
+                <tr v-for="(log, i) in ascendLogs" :key="i" class="hover:bg-slate-50 transition">
+                  <td class="py-3 px-4 font-mono font-medium text-slate-500">{{ log.date }}</td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-navy-50 text-navy-800 border border-navy-200">
+                      {{ log.type }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 font-medium text-slate-800">{{ lang === 'th' ? log.issue_th : log.issue }}</td>
+                  <td class="py-3 px-4 text-center font-bold text-emerald-600">{{ log.add ? '+' + log.add : '-' }}</td>
+                  <td class="py-3 px-4 text-center font-bold text-rose-600">{{ log.sub ? '-' + log.sub : '-' }}</td>
+                  <td class="py-3 px-4 text-right font-bold font-mono text-navy-900">{{ log.total.toLocaleString() }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- แท็บ 4: คลังความคิดเห็น & สมุดพก -->
         <div v-if="currentTab === 'comments'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div>
-            <h3 class="font-bold text-base text-slate-800">{{ t('commentBuilderTitle') }}</h3>
+            <h3 class="font-bold text-base text-navy-900">{{ t('commentBuilderTitle') }}</h3>
             <p class="text-xs text-slate-500">{{ t('commentBuilderSubtitle') }}</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('selectStudent') }}</label>
-              <select v-model="selectedStudent" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white">
+              <select v-model="selectedStudent" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white text-navy-900 font-medium">
                 <option v-for="s in students" :key="s.name" :value="s">{{ s.name }} ({{ s.class }} - {{ s.gender === 'boy' ? t('boy') : t('girl') }})</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('selectCategory') }}</label>
-              <select v-model="selectedCategory" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white">
+              <select v-model="selectedCategory" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white text-navy-900 font-medium">
                 <option value="CHARACTERISTICS">{{ t('characteristics') }}</option>
                 <option value="ATTITUDE">{{ t('attitude') }}</option>
                 <option value="RECOMMENDATION">{{ t('recommendation') }}</option>
@@ -212,26 +264,24 @@
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('selectLevel') }}</label>
-              <select v-model="selectedLevel" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white">
+              <select v-model="selectedLevel" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white text-navy-900 font-medium">
                 <option value="Good">{{ t('ratingGood') }}</option>
                 <option value="Needs Improvement">{{ t('ratingImprove') }}</option>
               </select>
             </div>
           </div>
 
-          <!-- รายการข้อความให้คลิกเลือก -->
           <div class="space-y-3">
-            <p class="text-xs font-bold text-slate-600">{{ t('clickToAdd') }}:</p>
+            <p class="text-xs font-bold text-navy-900">{{ t('clickToAdd') }}:</p>
             <div class="grid grid-cols-1 gap-2.5 max-h-72 overflow-y-auto pr-1">
               <div v-for="(tpl, idx) in availableTemplates" :key="idx" @click="applyTemplate(tpl)"
-                class="p-3 bg-white hover:bg-amber-50/50 rounded-lg border border-slate-200 hover:border-amber-400 cursor-pointer transition">
+                class="p-3 bg-white hover:bg-navy-50/60 rounded-lg border border-slate-200 hover:border-navy-400 cursor-pointer transition">
                 <p class="font-medium text-xs text-slate-800">{{ previewSentence(tpl.en) }}</p>
                 <p class="text-slate-500 mt-1 text-[11px]">{{ previewSentence(tpl.th) }}</p>
               </div>
             </div>
           </div>
 
-          <!-- กล่องผลลัพธ์ -->
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('generatedCommentBox') }}</label>
             <textarea v-model="generatedComment" rows="4" class="w-full border border-slate-300 rounded-lg p-3 text-xs bg-white shadow-inner font-mono text-slate-800 leading-relaxed"></textarea>
@@ -239,50 +289,74 @@
               <button @click="generatedComment = ''" class="px-4 py-2 text-xs border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-600 transition">
                 {{ t('clearText') }}
               </button>
-              <button @click="saveComment" class="px-5 py-2 text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg shadow transition">
+              <button @click="saveComment" class="px-5 py-2 text-xs bg-navy-900 hover:bg-navy-800 text-white font-bold rounded-lg shadow transition">
                 {{ t('saveToReport') }}
               </button>
             </div>
           </div>
         </div>
 
-        <!-- แท็บ 4: ประวัติการฝึกอบรม (Training Transcript) -->
-        <div v-if="currentTab === 'training'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <h3 class="font-bold text-base text-slate-800">{{ t('trainingTitle') }}</h3>
-              <p class="text-xs text-slate-500">{{ t('trainingSubtitle') }}</p>
-            </div>
-            <div class="text-xs bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-lg font-bold border border-emerald-200">
-              {{ t('totalHours') }}: 9.5 {{ t('hours') }}
-            </div>
-          </div>
-
-          <div class="divide-y divide-slate-100 text-xs">
-            <div v-for="(tr, idx) in trainingList" :key="idx" class="py-3 flex items-center justify-between">
-              <div class="w-28 font-mono text-slate-500">{{ tr.date }}</div>
-              <div class="flex-1 font-medium text-slate-800">{{ lang === 'th' ? tr.topic_th : tr.topic }}</div>
-              <div class="w-24 text-center font-bold text-slate-700">{{ tr.hours }} {{ t('hours') }}</div>
-              <div class="w-28 text-right text-slate-500">{{ tr.evidence }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- แท็บ 5: เช็กลิสต์สิ้นภาคเรียน (End of Term Checklist) -->
-        <div v-if="currentTab === 'checklist'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+        <!-- แท็บ 5: ลิงก์เอกสาร Extra Links ทั้งหมด -->
+        <div v-if="currentTab === 'links'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="border-b border-slate-100 pb-4">
-            <h3 class="font-bold text-base text-slate-800">{{ t('checklistTitle') }}</h3>
-            <p class="text-xs text-slate-500">{{ t('checklistSubtitle') }}</p>
+            <h3 class="font-bold text-base text-navy-900">🔗 {{ lang === 'th' ? 'ลิงก์และเอกสารที่เกี่ยวข้อง' : 'Extra Links & Resources' }}</h3>
+            <p class="text-xs text-slate-500">{{ lang === 'th' ? 'รวมลิงก์ไปยัง Google Sheets ทั้งหมดของโรงเรียนเด่นหล้า เพชรเกษม' : 'Direct links to official spreadsheets' }}</p>
           </div>
 
-          <div class="space-y-3">
-            <div v-for="(task, idx) in termTasks" :key="idx" class="p-3.5 rounded-lg border border-slate-200 flex items-start gap-3 bg-slate-50 hover:bg-white transition">
-              <input type="checkbox" v-model="task.checked" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 border-slate-300">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="https://docs.google.com/spreadsheets/d/1eTZic3FcaIu7QWY1z9Vfte3B1urbuPf7ATPJBdqdO-c/edit" target="_blank"
+               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
               <div>
-                <p class="text-xs font-bold" :class="task.checked ? 'text-slate-400 line-through' : 'text-slate-800'">{{ lang === 'th' ? task.title_th : task.title_en }}</p>
-                <p class="text-[11px] text-slate-500 mt-0.5">{{ lang === 'th' ? task.desc_th : task.desc_en }}</p>
+                <p class="text-xs font-bold text-navy-700 uppercase">Class Schedule</p>
+                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">PHET: Class Schedules 2025-2026</p>
               </div>
-            </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
+            </a>
+
+            <a href="https://docs.google.com/spreadsheets/d/1UPSqJqvRNhk3eFak6bdAmjlj8LruiwnX/edit" target="_blank"
+               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
+              <div>
+                <p class="text-xs font-bold text-navy-700 uppercase">10-Day Rotation</p>
+                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">Phetkasem 10 days Term 1</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
+            </a>
+
+            <a href="https://docs.google.com/spreadsheets/d/1hnGaBjEJsILe9wS9ZdpX9WuhSGWp4-5UYP4bOqXxy7s/edit" target="_blank"
+               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
+              <div>
+                <p class="text-xs font-bold text-navy-700 uppercase">Academy Schedule</p>
+                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">2025 After school schedule</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
+            </a>
+
+            <a href="https://docs.google.com/spreadsheets/d/1M1USnTQMcMIDPpT8co7Wote3n2Lo1rjA3lR5AVgl2Zo/edit" target="_blank"
+               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
+              <div>
+                <p class="text-xs font-bold text-navy-700 uppercase">Lesson Plans</p>
+                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">JD-Lesson Plans (DIP)</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
+            </a>
+
+            <a href="https://docs.google.com/spreadsheets/d/1FsnYv01lknKWHTG_Jd63fXxDdkI65y3MMv3pvExXOG8/edit" target="_blank"
+               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
+              <div>
+                <p class="text-xs font-bold text-navy-700 uppercase">Comment Tracker</p>
+                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">P4 - JD - Comment Trackers</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
+            </a>
+
+            <a href="https://docs.google.com/spreadsheets/d/1lp4Jt1GQWGFSnqVkg8_wOm7xK7bCYU3lStEGgE37MCk/edit" target="_blank"
+               class="p-4 rounded-lg border border-slate-200 hover:border-navy-500 hover:shadow-md transition flex items-center justify-between bg-slate-50/50 group">
+              <div>
+                <p class="text-xs font-bold text-navy-700 uppercase">Assessment</p>
+                <p class="text-sm font-semibold text-slate-800 group-hover:text-navy-900 mt-0.5">Speaking & HFW Tests (K2.6)</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-navy-100 text-navy-900 font-bold">Google Sheet ↗</span>
+            </a>
           </div>
         </div>
 
@@ -295,15 +369,14 @@
 
     const translations = {
       th: {
-        appTitle: 'ระบบจัดการวิชาการ',
-        academicYear: 'ภาคเรียนที่ 1 ปีการศึกษา 2026-2027',
+        appTitle: 'ระบบบริหารวิชาการ',
+        academicYear: 'ภาคเรียนที่ 1 ปีการศึกษา 2026-2027 • เด่นหล้า เพชรเกษม',
         level: 'ระดับ',
         points: 'แต้ม',
         needPoints: 'ต้องการอีก',
         toElite: 'สู่ระดับ Elite',
         days: 'วัน',
         items: 'รายการ',
-        hours: 'ชั่วโมง',
         ascendPoints: 'คะแนนสะสม ASCEND',
         credits: 'เครดิตสะสม',
         avgObserveScore: 'คะแนนสังเกตการสอนเฉลี่ย',
@@ -312,7 +385,9 @@
         leaveDetail: 'ลาป่วย 3 วัน / ลากิจ 3 วัน',
         termChecklist: 'ภารกิจสิ้นภาคเรียน',
         pendingReview: 'รอยืนยันช่วงสัปดาห์สอบ',
-        todaySchedule: 'ตารางสอนและหน้าที่วันนี้ (วันจันทร์ - สัปดาห์คู่)',
+        classroomScheduleTitle: 'ตารางสอนรายห้องเรียน',
+        rotationNote: 'ดึงข้อมูลตรงจากระบบตารางเวียน 10 วัน (Odd/Even Week Rotation)',
+        colDay: 'วันในสัปดาห์',
         ascendLogTitle: 'บันทึกคะแนนและการปฏิบัติงาน (ASCEND Activity Log)',
         ascendLogSubtitle: 'ดึงข้อมูลจริง 28 รายการจากระบบ Google Sheet',
         totalEntries: 'จำนวนบันทึกทั้งหมด',
@@ -338,27 +413,21 @@
         generatedCommentBox: 'ข้อความประเมินฉบับสมบูรณ์ (พร้อมส่งออก)',
         clearText: 'ล้างข้อความ',
         saveToReport: 'บันทึกลงสมุดพก',
-        trainingTitle: 'ระเบียนประวัติการฝึกอบรม (Training Transcript)',
-        trainingSubtitle: 'บันทึกประวัติการพัฒนาวิชาชีพของบุคลากรครู',
-        totalHours: 'รวมชั่วโมงฝึกอบรม',
-        checklistTitle: 'รายการตรวจสอบงานสิ้นภาคเรียน (End of Term Checklist)',
-        checklistSubtitle: 'กรุณาตรวจสอบความเรียบร้อยก่อนปิดภาคการศึกษา',
         menuDashboard: 'แดชบอร์ดภาพรวม',
+        menuSchedule: 'ตารางสอน 4 ห้องเรียน',
         menuProfile: 'บันทึกแต้ม ASCEND (28 รายการ)',
         menuComments: 'คลังความเห็น & สมุดพก',
-        menuTraining: 'ประวัติการอบรม (Transcript)',
-        menuChecklist: 'เช็กลิสต์สิ้นภาคเรียน',
+        menuLinks: 'ลิงก์เอกสาร Google Sheets',
       },
       en: {
         appTitle: 'School Academic System',
-        academicYear: 'Academic Year 2026-2027 • Term 1',
+        academicYear: 'Academic Year 2026-2027 • Term 1 • Denla Phetkasem',
         level: 'Level',
         points: 'Points',
         needPoints: 'Need',
         toElite: 'points to Elite',
         days: 'days',
         items: 'items',
-        hours: 'hours',
         ascendPoints: 'ASCEND Total Points',
         credits: 'ASCEND Credits',
         avgObserveScore: 'Average Observe Score',
@@ -367,7 +436,9 @@
         leaveDetail: '3 Sick / 3 Personal',
         termChecklist: 'End of Term Tasks',
         pendingReview: 'Awaiting end of term review',
-        todaySchedule: "Today's Schedule & Duty (Monday - Even Week)",
+        classroomScheduleTitle: 'Classroom Timetable',
+        rotationNote: 'Synced with 10-Day Rotation Schedule (Odd/Even Week)',
+        colDay: 'Day of Week',
         ascendLogTitle: 'ASCEND Activity & Points Log',
         ascendLogSubtitle: '28 Real entries synced from Google Spreadsheet',
         totalEntries: 'Total Logs',
@@ -393,16 +464,11 @@
         generatedCommentBox: 'Generated Feedback Draft (Ready for export)',
         clearText: 'Clear Text',
         saveToReport: 'Save to Report Card',
-        trainingTitle: 'Professional Learning Transcript',
-        trainingSubtitle: 'Teacher professional development training record',
-        totalHours: 'Total Hours',
-        checklistTitle: 'End of Term 1 Checklist',
-        checklistSubtitle: 'Please verify all tasks before term departure',
         menuDashboard: 'Overview Dashboard',
+        menuSchedule: 'Schedules (4 Classes)',
         menuProfile: 'ASCEND Log (28 Records)',
         menuComments: 'Comment Bank & Reports',
-        menuTraining: 'Training Transcript',
-        menuChecklist: 'End of Term Checklist',
+        menuLinks: 'Google Sheets Links',
       }
     };
 
@@ -411,6 +477,7 @@
         return {
           lang: 'th',
           currentTab: 'dashboard',
+          activeRoom: '1.1',
           teacher: {
             fullName: 'Mr. Jaun Dre Steyn (JD)',
             nickname: 'JD',
@@ -425,18 +492,227 @@
           },
           menus: [
             { id: 'dashboard', i18nKey: 'menuDashboard', icon: '📊' },
+            { id: 'schedule', i18nKey: 'menuSchedule', icon: '📅' },
             { id: 'profile', i18nKey: 'menuProfile', icon: '🎖️' },
             { id: 'comments', i18nKey: 'menuComments', icon: '💬' },
-            { id: 'training', i18nKey: 'menuTraining', icon: '🎓' },
-            { id: 'checklist', i18nKey: 'menuChecklist', icon: '✅' },
+            { id: 'links', i18nKey: 'menuLinks', icon: '🔗' },
           ],
-          todaySchedule: [
-            { time: '08:00 - 08:30', subject_th: 'เข้าแถวและสวดมนต์ (Chanting Duty)', subject_en: 'Assembly & Chanting Duty', room: 'โถง DIP', badge_th: 'เวรประจำวัน', badge_en: 'Daily Duty', badgeClass: 'bg-amber-100 text-amber-800' },
-            { time: '08:30 - 09:00', subject_th: 'ภาษาอังกฤษ ชั้น K1.4', subject_en: 'English Class K1.4', room: 'ห้อง K1.4', badge_th: 'คาบสอนหลัก', badge_en: 'Core Lesson', badgeClass: 'bg-emerald-100 text-emerald-800' },
-            { time: '10:10 - 10:40', subject_th: 'วิทยาศาสตร์ - ประสาทสัมผัสรับรส (Sense of Taste)', subject_en: 'Science - Sense of Taste', room: 'ห้องวิทย์ DIP', badge_th: 'คาบสอนหลัก', badge_en: 'Core Lesson', badgeClass: 'bg-emerald-100 text-emerald-800' },
-            { time: '11:10 - 12:20', subject_th: 'พักกลางวันและดูแลเด็กรับประทานอาหาร', subject_en: 'Lunch Time Supervision', room: 'โรงอาหาร', badge_th: 'เวรประจำวัน', badge_en: 'Duty', badgeClass: 'bg-amber-100 text-amber-800' },
-            { time: '14:00 - 15:00', subject_th: 'อ็อกซ์ฟอร์ด รอบที่ 1 (Afterschool)', subject_en: 'Oxford Round 1 (Afterschool)', room: 'ห้อง B204', badge_th: 'คลาสเสริม', badge_en: 'Academy', badgeClass: 'bg-indigo-100 text-indigo-800' }
+          classrooms: [
+            { code: '1.1', name: 'ห้อง K1.1', teacher: 'Teacher JD' },
+            { code: '1.4', name: 'ห้อง K1.4', teacher: 'Teacher Dee' },
+            { code: '2.5', name: 'ห้อง K2.5', teacher: 'Teacher JD' },
+            { code: '2.6', name: 'ห้อง K2.6', teacher: 'Teacher Jenna' },
           ],
+          scheduleData: {
+            '1.1': {
+              code: 'K1.1',
+              teacher: 'Teacher JD',
+              timeSlots: ['08:00 - 08:30', '08:30 - 09:00', '10:10 - 10:40', '10:40 - 11:10'],
+              days: [
+                {
+                  day_th: 'วันจันทร์', day_en: 'Monday',
+                  slots: [
+                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' },
+                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' },
+                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' },
+                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันอังคาร', day_en: 'Tuesday',
+                  slots: [
+                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
+                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
+                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
+                    { th: 'สนทนา Show & Tell', en: 'Show and Tell Conver.', type: 'Speaking' }
+                  ]
+                },
+                {
+                  day_th: 'วันพุธ', day_en: 'Wednesday',
+                  slots: [
+                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' },
+                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
+                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' },
+                    { th: 'Student Book + CD', en: 'Student Book + CD', type: 'Textbook' }
+                  ]
+                },
+                {
+                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
+                  slots: [
+                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
+                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' },
+                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
+                    { th: 'แบบฝึกหัด Workbook 1', en: 'Workbook 1', type: 'Exercise' }
+                  ]
+                },
+                {
+                  day_th: 'วันศุกร์', day_en: 'Friday',
+                  slots: [
+                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' },
+                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' },
+                    { th: 'แบบฝึกหัด Workbook 2', en: 'Workbook 2', type: 'Exercise' },
+                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' }
+                  ]
+                }
+              ]
+            },
+            '1.4': {
+              code: 'K1.4',
+              teacher: 'Teacher Dee',
+              timeSlots: ['08:00 - 08:30', '08:30 - 09:00', '10:10 - 10:40', '10:40 - 11:10'],
+              days: [
+                {
+                  day_th: 'วันจันทร์', day_en: 'Monday',
+                  slots: [
+                    { th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.', type: 'Speaking' },
+                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' },
+                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' },
+                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' }
+                  ]
+                },
+                {
+                  day_th: 'วันอังคาร', day_en: 'Tuesday',
+                  slots: [
+                    { th: 'Student Book + CD', en: 'Student Book + CD', type: 'Textbook' },
+                    { th: 'แบบฝึกหัด Workbook 1', en: 'Workbook 1', type: 'Exercise' },
+                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
+                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันพุธ', day_en: 'Wednesday',
+                  slots: [
+                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' },
+                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
+                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
+                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
+                  slots: [
+                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
+                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
+                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
+                    { th: 'แบบฝึกหัด Workbook 2', en: 'Workbook 2', type: 'Exercise' }
+                  ]
+                },
+                {
+                  day_th: 'วันศุกร์', day_en: 'Friday',
+                  slots: [
+                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' },
+                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' },
+                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
+                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' }
+                  ]
+                }
+              ]
+            },
+            '2.5': {
+              code: 'K2.5',
+              teacher: 'Teacher JD',
+              timeSlots: ['09:00 - 09:30', '09:40 - 10:10', '12:20 - 12:50', '12:50 - 13:20'],
+              days: [
+                {
+                  day_th: 'วันจันทร์', day_en: 'Monday',
+                  slots: [
+                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
+                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' },
+                    { th: 'การอ่านสะกดคำ', en: 'Reading', type: 'Reading' },
+                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันอังคาร', day_en: 'Tuesday',
+                  slots: [
+                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' },
+                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
+                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
+                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันพุธ', day_en: 'Wednesday',
+                  slots: [
+                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
+                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
+                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
+                    { th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.', type: 'Speaking' }
+                  ]
+                },
+                {
+                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
+                  slots: [
+                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' },
+                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' },
+                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' },
+                    { th: 'การเขียนภาษาอังกฤษ', en: 'Writing', type: 'Writing' }
+                  ]
+                },
+                {
+                  day_th: 'วันศุกร์', day_en: 'Friday',
+                  slots: [
+                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' },
+                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
+                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
+                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' }
+                  ]
+                }
+              ]
+            },
+            '2.6': {
+              code: 'K2.6',
+              teacher: 'Teacher Jenna',
+              timeSlots: ['09:00 - 09:30', '09:40 - 10:10', '12:20 - 12:50', '12:50 - 13:20'],
+              days: [
+                {
+                  day_th: 'วันจันทร์', day_en: 'Monday',
+                  slots: [
+                    { th: 'ภาษาอังกฤษ 1', en: 'English 1', type: 'Core' },
+                    { th: 'คณิตศาสตร์ 1', en: 'Math 1', type: 'Core' },
+                    { th: 'การอ่านสะกดคำ', en: 'Reading', type: 'Reading' },
+                    { th: 'โฟนิกส์ 1', en: 'Phonics 1', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันอังคาร', day_en: 'Tuesday',
+                  slots: [
+                    { th: 'สนทนา Show & Tell', en: 'Show & Tell Conver.', type: 'Speaking' },
+                    { th: 'คอมพิวเตอร์โฟนิกส์', en: 'Computer (Phonics)', type: 'Lab' },
+                    { th: 'ภาษาอังกฤษ 2', en: 'English 2', type: 'Core' },
+                    { th: 'โฟนิกส์ 2', en: 'Phonics 2', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันพุธ', day_en: 'Wednesday',
+                  slots: [
+                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
+                    { th: 'Show and Tell', en: 'Show and Tell', type: 'Speaking' },
+                    { th: 'เล่านิทาน (ห้องสมุด)', en: 'Storytelling (Library)', type: 'Activity' },
+                    { th: 'คณิตศาสตร์ 2', en: 'Math 2', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันพฤหัสบดี', day_en: 'Thursday',
+                  slots: [
+                    { th: 'ภาษาอังกฤษ 3', en: 'English 3', type: 'Core' },
+                    { th: 'การเล่นแบบเคลื่อนไหว', en: 'Active Play', type: 'Play' },
+                    { th: 'การเขียนภาษาอังกฤษ', en: 'Writing', type: 'Writing' },
+                    { th: 'โฟนิกส์ 3', en: 'Phonics 3', type: 'Core' }
+                  ]
+                },
+                {
+                  day_th: 'วันศุกร์', day_en: 'Friday',
+                  slots: [
+                    { th: 'วิทยาศาสตร์', en: 'Science 1', type: 'Core' },
+                    { th: 'วิทยาศาสตร์ (ทดลอง)', en: 'Science 2', type: 'Core' },
+                    { th: 'การเล่นกลางแจ้ง', en: 'Active Play Outside', type: 'Play' },
+                    { th: 'ภาษาอังกฤษ 4', en: 'English 4', type: 'Core' }
+                  ]
+                }
+              ]
+            }
+          },
           ascendLogs: [
             { date: '2026-05-11', type: 'Professionalism', add: 30, sub: 0, total: 2330, issue: 'Helping assist with schedule adjustments to ensure smooth transitions.', issue_th: 'ช่วยประสานงานปรับเปลี่ยนตารางเวลาเพื่อให้การจัดการชั้นเรียนราบรื่น' },
             { date: '2026-05-20', type: 'Attendance', add: 50, sub: 0, total: 2380, issue: 'On-time clock-in', issue_th: 'บันทึกเวลาเข้างานตรงเวลา' },
@@ -492,28 +768,16 @@
               th: "____ มีความมั่นใจในการพูดภาษาอังกฤษมากขึ้นอย่างเห็นได้ชัด"
             }
           ],
-          generatedComment: '',
-          trainingList: [
-            { date: '2026-05-04', topic: 'Company Rules & Regs', topic_th: 'กฎระเบียบและข้อบังคับองค์กร', hours: 0.5, evidence: 'Attendance' },
-            { date: '2026-05-04', topic: 'Thai Culture in the Classroom', topic_th: 'วัฒนธรรมไทยในชั้นเรียน', hours: 0.5, evidence: 'Attendance' },
-            { date: '2026-05-04', topic: 'Understanding Young ESL Learners', topic_th: 'ความเข้าใจผู้เรียนเด็กเล็กภาษาอังกฤษ', hours: 0.5, evidence: 'Attendance' },
-            { date: '2026-05-04', topic: 'Classroom management', topic_th: 'การจัดการชั้นเรียน', hours: 1.0, evidence: 'Attendance' },
-            { date: '2026-05-05', topic: 'Using songs & dance in the classroom', topic_th: 'การใช้บทเพลงและการเคลื่อนไหว', hours: 1.0, evidence: 'Attendance' },
-            { date: '2026-05-05', topic: 'Structuring a 30 minute lesson', topic_th: 'การวางโครงสร้างบทเรียน 30 นาที', hours: 1.0, evidence: 'Lesson Plan' }
-          ],
-          termTasks: [
-            { checked: false, title_en: 'Midterm/Final Reports', title_th: 'รายงานผลการเรียนกลางภาค/ปลายภาค', desc_en: 'Add stars and detailed comments for every student.', desc_th: 'ระบุคะแนนดาวและข้อคิดเห็นให้ครบถ้วนทุกรายบุคคล' },
-            { checked: false, title_en: 'Afterschool Reports', title_th: 'รายงานคลาสเรียนพิเศษหลังเลิกเรียน', desc_en: 'Submit Oxford and Little Owls progress reports.', desc_th: 'ส่งรายงานความก้าวหน้าคอร์ส Oxford และ Little Owls' },
-            { checked: false, title_en: 'Signing / Checking Workbooks', title_th: 'ตรวจและลงลายมือชื่อในสมุดงาน', desc_en: 'Signing and checking all worksheets & workbooks.', desc_th: 'ตรวจเช็กแบบฝึกหัดและเซ็นชื่อกำกับทั้งหมด' },
-            { checked: false, title_en: 'Clean Desks & Stations', title_th: 'ทำความสะอาดโต๊ะทำงานและพื้นที่ส่วนตัว', desc_en: 'Ensure workspace is completely cleared.', desc_th: 'จัดโต๊ะทำงานให้สะอาดเรียบร้อยก่อนปิดภาคเรียน' },
-            { checked: false, title_en: 'Final Time Sheet', title_th: 'กรอกใบลงเวลาทำงานรอบสุดท้าย', desc_en: 'Fill in and verify monthly timesheet.', desc_th: 'ตรวจสอบและยื่นใบสรุปเวลาทำงานประจำเดือน' }
-          ]
+          generatedComment: ''
         };
       },
       computed: {
         currentTabTitle() {
           const m = this.menus.find(item => item.id === this.currentTab);
           return m ? this.t(m.i18nKey) : '';
+        },
+        currentRoomData() {
+          return this.scheduleData[this.activeRoom] || this.scheduleData['1.1'];
         }
       },
       methods: {
