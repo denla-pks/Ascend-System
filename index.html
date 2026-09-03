@@ -3,124 +3,287 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบบริหารจัดการวิชาการและบุคลากรครู (ASCEND Portal)</title>
+  <title>ASCEND Portal - School Academic & Teacher Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <!-- โหลดไลบรารีเชื่อมต่อฐานข้อมูล Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style> body { font-family: 'Sarabun', sans-serif; } </style>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', 'Inter', sans-serif; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 antialiased">
   <div id="app" class="flex h-screen overflow-hidden">
     
     <!-- แถบเมนูด้านข้าง (Sidebar) -->
-    <aside class="w-64 bg-slate-900 text-slate-200 flex flex-col justify-between shadow-xl">
+    <aside class="w-64 bg-slate-900 text-slate-200 flex flex-col justify-between shadow-2xl flex-shrink-0">
       <div>
+        <!-- ส่วนหัวแสดงโลโก้จริง -->
         <div class="p-5 border-b border-slate-800 flex items-center gap-3">
-          <!-- แสดงโลโก้จริงจากไฟล์ logo.png -->
-          <img src="logo.png" alt="Logo" class="w-10 h-10 object-contain rounded-lg bg-white p-1 shadow" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-          <!-- ตัวสำรองกรณีรูปไม่ขึ้น -->
+          <img src="logo.png" alt="Logo" class="w-10 h-10 object-contain rounded-lg bg-white p-1 shadow-md" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
           <div style="display:none;" class="w-10 h-10 bg-amber-500 rounded-lg items-center justify-center font-bold text-slate-950 text-xl shadow">A</div>
-          
           <div>
-            <h1 class="font-bold text-base text-white tracking-wide leading-tight">ระบบจัดการวิชาการ</h1>
-            <p class="text-xs text-amber-400">ASCEND Education Portal</p>
+            <h1 class="font-bold text-sm text-white tracking-wide leading-tight">{{ t('appTitle') }}</h1>
+            <p class="text-xs text-amber-400 font-medium">ASCEND Portal</p>
           </div>
         </div>
 
-        <nav class="p-4 space-y-1">
+        <!-- รายการเมนูหลัก -->
+        <nav class="p-3 space-y-1">
           <button v-for="menu in menus" :key="menu.id" @click="currentTab = menu.id"
-            :class="currentTab === menu.id ? 'bg-amber-500/20 text-amber-400 font-semibold border-r-4 border-amber-400' : 'hover:bg-slate-800 text-slate-300'"
-            class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition">
-            <span class="text-lg">{{ menu.icon }}</span>
-            <span class="text-sm">{{ menu.name }}</span>
+            :class="currentTab === menu.id ? 'bg-amber-500/20 text-amber-400 font-semibold border-r-4 border-amber-400' : 'hover:bg-slate-800/70 text-slate-300 font-normal'"
+            class="w-full text-left px-3.5 py-2.5 rounded-lg flex items-center gap-3 transition text-sm">
+            <span class="text-base">{{ menu.icon }}</span>
+            <span>{{ t(menu.i18nKey) }}</span>
           </button>
         </nav>
       </div>
 
-      <div class="p-4 border-t border-slate-800 text-xs text-slate-400">
-        <div class="flex items-center gap-3 mb-1">
-          <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white uppercase">{{ teacher.nickname || 'JD' }}</div>
-          <div>
-            <p class="font-semibold text-white">{{ teacher.full_name || 'กำลังโหลด...' }}</p>
-            <p>{{ teacher.school || 'โรงเรียนเด่นหล้า เพชรเกษม' }}</p>
+      <!-- ข้อมูลผู้ใช้ด้านล่าง -->
+      <div class="p-4 border-t border-slate-800 text-xs text-slate-400 bg-slate-950/40">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center font-bold shadow">
+            {{ teacher.nickname }}
+          </div>
+          <div class="overflow-hidden">
+            <p class="font-semibold text-white truncate">{{ teacher.fullName }}</p>
+            <p class="text-[11px] text-slate-400 truncate">{{ teacher.school }}</p>
           </div>
         </div>
       </div>
     </aside>
 
-    <!-- พื้นที่เนื้อหาหลัก -->
+    <!-- พื้นที่แสดงผลเนื้อหาหลัก (Main Area) -->
     <main class="flex-1 flex flex-col overflow-y-auto">
-      <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm">
+      
+      <!-- Topbar แถบบนพร้อมปุ่มสลับภาษา TH / EN -->
+      <header class="bg-white border-b border-slate-200 px-8 py-3.5 flex items-center justify-between shadow-sm sticky top-0 z-10">
         <div>
-          <h2 class="text-xl font-bold text-slate-800">{{ currentMenuTitle }}</h2>
-          <p class="text-xs text-slate-500">ภาคเรียนที่ 1 ปีการศึกษา 2026-2027</p>
+          <h2 class="text-lg font-bold text-slate-800">{{ currentTabTitle }}</h2>
+          <p class="text-xs text-slate-400 font-medium">{{ t('academicYear') }}</p>
         </div>
-        <div class="flex items-center gap-4">
-          <!-- ตัวแสดงสถานะการเชื่อมต่อฐานข้อมูล -->
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full" :class="dbConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"></span>
-            <span class="text-xs text-slate-500">{{ dbConnected ? 'เชื่อมต่อฐานข้อมูลแล้ว' : 'กำลังเชื่อมต่อ / โหมดจำลอง' }}</span>
+
+        <div class="flex items-center gap-5">
+          <!-- ปุ่มสลับภาษา TH / EN -->
+          <div class="inline-flex bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner">
+            <button @click="lang = 'th'" :class="lang === 'th' ? 'bg-white text-slate-900 shadow font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'" class="px-3 py-1 text-xs rounded-md transition flex items-center gap-1.5">
+              <span>🇹🇭</span>
+              <span>ภาษาไทย</span>
+            </button>
+            <button @click="lang = 'en'" :class="lang === 'en' ? 'bg-white text-slate-900 shadow font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'" class="px-3 py-1 text-xs rounded-md transition flex items-center gap-1.5">
+              <span>🇬🇧</span>
+              <span>English</span>
+            </button>
           </div>
-          <div class="text-right">
-            <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold">🟠 {{ teacher.rank_title }} (ระดับ {{ teacher.rank_level }})</span>
-            <p class="text-xs font-semibold text-slate-600 mt-1">{{ teacher.ascend_points }} แต้ม (ต้องการอีก 590 แต้มสู่ระดับ Elite)</p>
+
+          <!-- ป้ายแสดงคะแนน ASCEND -->
+          <div class="text-right pl-3 border-l border-slate-200">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+              <span>{{ teacher.rankTitle }}</span>
+              <span>({{ t('level') }} {{ teacher.rankLevel }})</span>
+            </div>
+            <p class="text-xs font-semibold text-slate-600 mt-1">{{ teacher.points.toLocaleString() }} {{ t('points') }} ({{ t('needPoints') }} {{ teacher.pointsUntilNext }} {{ t('toElite') }})</p>
           </div>
         </div>
       </header>
 
+      <!-- พื้นที่เนื้อหาแต่ละแท็บ -->
       <div class="p-8 space-y-6">
 
-        <!-- แท็บ 1: แดชบอร์ดภาพรวม -->
+        <!-- แท็บ 1: แดชบอร์ดภาพรวม (Overview Dashboard) -->
         <div v-if="currentTab === 'dashboard'" class="space-y-6">
+          <!-- การ์ด 4 ช่องด้านบน -->
           <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500">คะแนนสะสม ASCEND</p>
-              <p class="text-2xl font-bold text-amber-600 mt-1">{{ teacher.ascend_points }}</p>
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+              <p class="text-xs text-slate-500 font-medium">{{ t('ascendPoints') }}</p>
+              <p class="text-3xl font-bold text-amber-600 mt-1">{{ teacher.points.toLocaleString() }}</p>
               <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
-                <div class="bg-amber-500 h-full" :style="{ width: (teacher.ascend_points / 4000 * 100) + '%' }"></div>
+                <div class="bg-amber-500 h-full rounded-full transition-all" :style="{ width: (teacher.points / 4000 * 100) + '%' }"></div>
               </div>
+              <p class="text-[11px] text-slate-400 mt-2">{{ t('credits') }}: {{ teacher.credits }}</p>
             </div>
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500">คะแนนสังเกตการสอนเฉลี่ย</p>
-              <p class="text-2xl font-bold text-emerald-600 mt-1">{{ teacher.avg_observation_score }}</p>
-              <p class="text-xs text-slate-400 mt-1">ประเมินล่าสุด 55/55 คะแนนเต็ม</p>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+              <p class="text-xs text-slate-500 font-medium">{{ t('avgObserveScore') }}</p>
+              <p class="text-3xl font-bold text-emerald-600 mt-1">{{ teacher.avgScore }}</p>
+              <p class="text-xs text-slate-400 mt-2">{{ t('latestScore') }}: 55/55 A+ (FO-98%)</p>
             </div>
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500">สิทธิ์การลาคงเหลือ</p>
-              <p class="text-2xl font-bold text-blue-600 mt-1">{{ teacher.leave_balance }} วัน</p>
-              <p class="text-xs text-slate-400 mt-1">ลาป่วย 3 วัน / ลากิจ 3 วัน</p>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+              <p class="text-xs text-slate-500 font-medium">{{ t('leaveBalance') }}</p>
+              <p class="text-3xl font-bold text-blue-600 mt-1">6 {{ t('days') }}</p>
+              <p class="text-xs text-slate-400 mt-2">{{ t('leaveDetail') }}</p>
             </div>
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500">ภารกิจสิ้นภาคเรียน</p>
-              <p class="text-2xl font-bold text-indigo-600 mt-1">0 / 6 ข้อ</p>
-              <p class="text-xs text-slate-400 mt-1">รอยืนยันช่วงสัปดาห์สอบ</p>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+              <p class="text-xs text-slate-500 font-medium">{{ t('termChecklist') }}</p>
+              <p class="text-3xl font-bold text-indigo-600 mt-1">0 / 6 {{ t('items') }}</p>
+              <p class="text-xs text-slate-400 mt-2">{{ t('pendingReview') }}</p>
             </div>
           </div>
 
-          <!-- ตารางสอนที่ดึงจาก Supabase -->
+          <!-- ตารางสอนวันนี้ -->
           <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-4 flex items-center justify-between">
-              <span>📅 ตารางสอนและหน้าที่วันนี้ (ดึงข้อมูลเรียลไทม์)</span>
-              <span class="text-xs text-blue-600 font-normal">ตึก DIP / แผนกอนุบาล</span>
-            </h3>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                <span>📅</span>
+                <span>{{ t('todaySchedule') }}</span>
+              </h3>
+              <span class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">{{ teacher.school }}</span>
+            </div>
             <div class="divide-y divide-slate-100">
-              <div v-for="item in todaySchedule" :key="item.time_slot" class="py-3 flex items-center justify-between text-sm">
-                <div class="w-36 font-mono text-xs text-slate-500 font-semibold">{{ item.time_slot }}</div>
-                <div class="flex-1 font-semibold text-slate-800">{{ item.subject }}</div>
+              <div v-for="item in todaySchedule" :key="item.time" class="py-3.5 flex items-center justify-between text-sm">
+                <div class="w-36 font-mono text-xs text-slate-500 font-bold">{{ item.time }}</div>
+                <div class="flex-1 font-semibold text-slate-800">{{ lang === 'th' ? item.subject_th : item.subject_en }}</div>
                 <div class="w-28 text-xs px-2.5 py-1 rounded bg-slate-100 text-slate-600 text-center font-medium">{{ item.room }}</div>
-                <div class="w-28 text-right text-xs font-bold px-2 py-0.5 rounded" :class="item.badge_class">{{ item.badge }}</div>
+                <div class="w-32 text-right">
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="item.badgeClass">
+                    {{ lang === 'th' ? item.badge_th : item.badge_en }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- แท็บอื่น ๆ พร้อมสลับหน้า -->
-        <div v-else class="bg-white p-12 text-center rounded-xl border border-slate-200 shadow-sm">
-          <p class="text-3xl mb-2">{{ currentMenuIcon }}</p>
-          <h3 class="text-lg font-bold text-slate-800 mb-1">{{ currentMenuTitle }}</h3>
-          <p class="text-sm text-slate-500">ระบบเชื่อมต่อฐานข้อมูลเรียบร้อย พร้อมสำหรับพัฒนาฟังก์ชันในส่วนนี้ต่อ</p>
+        <!-- แท็บ 2: ประวัติแต้ม ASCEND (ดึงข้อมูลจริงครบ 28 รายการ) -->
+        <div v-if="currentTab === 'profile'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="font-bold text-base text-slate-800">{{ t('ascendLogTitle') }}</h3>
+              <p class="text-xs text-slate-500">{{ t('ascendLogSubtitle') }}</p>
+            </div>
+            <div class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg text-slate-600 font-semibold">
+              {{ t('totalEntries') }}: {{ ascendLogs.length }} {{ t('items') }}
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="py-3 px-4">{{ t('colDate') }}</th>
+                  <th class="py-3 px-4">{{ t('colType') }}</th>
+                  <th class="py-3 px-4">{{ t('colReport') }}</th>
+                  <th class="py-3 px-4 text-center">{{ t('colAdd') }}</th>
+                  <th class="py-3 px-4 text-center">{{ t('colSub') }}</th>
+                  <th class="py-3 px-4 text-right">{{ t('colTotal') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="(log, i) in ascendLogs" :key="i" class="hover:bg-slate-50/70 transition">
+                  <td class="py-3 px-4 font-mono font-medium text-slate-500">{{ log.date }}</td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold"
+                      :class="log.type.includes('Attendance') ? 'bg-blue-50 text-blue-700' : (log.type.includes('Academic') ? 'bg-emerald-50 text-emerald-700' : 'bg-purple-50 text-purple-700')">
+                      {{ log.type }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 font-medium text-slate-800">{{ lang === 'th' ? log.issue_th : log.issue }}</td>
+                  <td class="py-3 px-4 text-center font-bold text-emerald-600">{{ log.add ? '+' + log.add : '-' }}</td>
+                  <td class="py-3 px-4 text-center font-bold text-rose-600">{{ log.sub ? '-' + log.sub : '-' }}</td>
+                  <td class="py-3 px-4 text-right font-bold font-mono text-slate-700">{{ log.total.toLocaleString() }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- แท็บ 3: คลังความคิดเห็น & เครื่องมือจัดทำสมุดพก (Comment Builder) -->
+        <div v-if="currentTab === 'comments'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div>
+            <h3 class="font-bold text-base text-slate-800">{{ t('commentBuilderTitle') }}</h3>
+            <p class="text-xs text-slate-500">{{ t('commentBuilderSubtitle') }}</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('selectStudent') }}</label>
+              <select v-model="selectedStudent" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white">
+                <option v-for="s in students" :key="s.name" :value="s">{{ s.name }} ({{ s.class }} - {{ s.gender === 'boy' ? t('boy') : t('girl') }})</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('selectCategory') }}</label>
+              <select v-model="selectedCategory" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white">
+                <option value="CHARACTERISTICS">{{ t('characteristics') }}</option>
+                <option value="ATTITUDE">{{ t('attitude') }}</option>
+                <option value="RECOMMENDATION">{{ t('recommendation') }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('selectLevel') }}</label>
+              <select v-model="selectedLevel" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white">
+                <option value="Good">{{ t('ratingGood') }}</option>
+                <option value="Needs Improvement">{{ t('ratingImprove') }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- รายการข้อความให้คลิกเลือก -->
+          <div class="space-y-3">
+            <p class="text-xs font-bold text-slate-600">{{ t('clickToAdd') }}:</p>
+            <div class="grid grid-cols-1 gap-2.5 max-h-72 overflow-y-auto pr-1">
+              <div v-for="(tpl, idx) in availableTemplates" :key="idx" @click="applyTemplate(tpl)"
+                class="p-3 bg-white hover:bg-amber-50/50 rounded-lg border border-slate-200 hover:border-amber-400 cursor-pointer transition">
+                <p class="font-medium text-xs text-slate-800">{{ previewSentence(tpl.en) }}</p>
+                <p class="text-slate-500 mt-1 text-[11px]">{{ previewSentence(tpl.th) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- กล่องผลลัพธ์ -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('generatedCommentBox') }}</label>
+            <textarea v-model="generatedComment" rows="4" class="w-full border border-slate-300 rounded-lg p-3 text-xs bg-white shadow-inner font-mono text-slate-800 leading-relaxed"></textarea>
+            <div class="mt-3 flex justify-end gap-3">
+              <button @click="generatedComment = ''" class="px-4 py-2 text-xs border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-600 transition">
+                {{ t('clearText') }}
+              </button>
+              <button @click="saveComment" class="px-5 py-2 text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg shadow transition">
+                {{ t('saveToReport') }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- แท็บ 4: ประวัติการฝึกอบรม (Training Transcript) -->
+        <div v-if="currentTab === 'training'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="font-bold text-base text-slate-800">{{ t('trainingTitle') }}</h3>
+              <p class="text-xs text-slate-500">{{ t('trainingSubtitle') }}</p>
+            </div>
+            <div class="text-xs bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-lg font-bold border border-emerald-200">
+              {{ t('totalHours') }}: 9.5 {{ t('hours') }}
+            </div>
+          </div>
+
+          <div class="divide-y divide-slate-100 text-xs">
+            <div v-for="(tr, idx) in trainingList" :key="idx" class="py-3 flex items-center justify-between">
+              <div class="w-28 font-mono text-slate-500">{{ tr.date }}</div>
+              <div class="flex-1 font-medium text-slate-800">{{ lang === 'th' ? tr.topic_th : tr.topic }}</div>
+              <div class="w-24 text-center font-bold text-slate-700">{{ tr.hours }} {{ t('hours') }}</div>
+              <div class="w-28 text-right text-slate-500">{{ tr.evidence }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- แท็บ 5: เช็กลิสต์สิ้นภาคเรียน (End of Term Checklist) -->
+        <div v-if="currentTab === 'checklist'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <h3 class="font-bold text-base text-slate-800">{{ t('checklistTitle') }}</h3>
+            <p class="text-xs text-slate-500">{{ t('checklistSubtitle') }}</p>
+          </div>
+
+          <div class="space-y-3">
+            <div v-for="(task, idx) in termTasks" :key="idx" class="p-3.5 rounded-lg border border-slate-200 flex items-start gap-3 bg-slate-50 hover:bg-white transition">
+              <input type="checkbox" v-model="task.checked" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 border-slate-300">
+              <div>
+                <p class="text-xs font-bold" :class="task.checked ? 'text-slate-400 line-through' : 'text-slate-800'">{{ lang === 'th' ? task.title_th : task.title_en }}</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">{{ lang === 'th' ? task.desc_th : task.desc_en }}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -130,81 +293,251 @@
   <script>
     const { createApp } = Vue;
 
-    // >>> ใส่ค่าจาก Supabase ของคุณที่ 2 บรรทัดนี้ <<<
-    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const SUPABASE_KEY = 'YOUR_ANON_PUBLIC_KEY';
+    const translations = {
+      th: {
+        appTitle: 'ระบบจัดการวิชาการ',
+        academicYear: 'ภาคเรียนที่ 1 ปีการศึกษา 2026-2027',
+        level: 'ระดับ',
+        points: 'แต้ม',
+        needPoints: 'ต้องการอีก',
+        toElite: 'สู่ระดับ Elite',
+        days: 'วัน',
+        items: 'รายการ',
+        hours: 'ชั่วโมง',
+        ascendPoints: 'คะแนนสะสม ASCEND',
+        credits: 'เครดิตสะสม',
+        avgObserveScore: 'คะแนนสังเกตการสอนเฉลี่ย',
+        latestScore: 'การประเมินล่าสุด',
+        leaveBalance: 'สิทธิ์การลาคงเหลือ',
+        leaveDetail: 'ลาป่วย 3 วัน / ลากิจ 3 วัน',
+        termChecklist: 'ภารกิจสิ้นภาคเรียน',
+        pendingReview: 'รอยืนยันช่วงสัปดาห์สอบ',
+        todaySchedule: 'ตารางสอนและหน้าที่วันนี้ (วันจันทร์ - สัปดาห์คู่)',
+        ascendLogTitle: 'บันทึกคะแนนและการปฏิบัติงาน (ASCEND Activity Log)',
+        ascendLogSubtitle: 'ดึงข้อมูลจริง 28 รายการจากระบบ Google Sheet',
+        totalEntries: 'จำนวนบันทึกทั้งหมด',
+        colDate: 'วันที่',
+        colType: 'ประเภทงาน',
+        colReport: 'รายการบันทึก / พฤติกรรม',
+        colAdd: 'บวกแต้ม',
+        colSub: 'หักแต้ม',
+        colTotal: 'แต้มรวม',
+        commentBuilderTitle: 'เครื่องมือจัดทำรายงานผลการเรียน (Comment Builder)',
+        commentBuilderSubtitle: 'ระบบแทนที่ชื่อและคำสรรพนามให้อัตโนมัติ ป้องกันการใช้ประโยคซ้ำ',
+        selectStudent: 'เลือกนักเรียน',
+        selectCategory: 'หมวดหมู่ประเมิน',
+        selectLevel: 'ระดับผลการเรียนรู้',
+        boy: 'ชาย',
+        girl: 'หญิง',
+        characteristics: 'คุณลักษณะ (Characteristics)',
+        attitude: 'ทัศนคติและการเรียนรู้ (Attitude)',
+        recommendation: 'ข้อเสนอแนะผู้ปกครอง (Recommendation)',
+        ratingGood: 'ระดับดี / โดดเด่น (Good)',
+        ratingImprove: 'ระดับควรส่งเสริม (Needs Improvement)',
+        clickToAdd: 'คลิกที่ประโยคด้านล่างเพื่อบรรจุลงในรายงาน',
+        generatedCommentBox: 'ข้อความประเมินฉบับสมบูรณ์ (พร้อมส่งออก)',
+        clearText: 'ล้างข้อความ',
+        saveToReport: 'บันทึกลงสมุดพก',
+        trainingTitle: 'ระเบียนประวัติการฝึกอบรม (Training Transcript)',
+        trainingSubtitle: 'บันทึกประวัติการพัฒนาวิชาชีพของบุคลากรครู',
+        totalHours: 'รวมชั่วโมงฝึกอบรม',
+        checklistTitle: 'รายการตรวจสอบงานสิ้นภาคเรียน (End of Term Checklist)',
+        checklistSubtitle: 'กรุณาตรวจสอบความเรียบร้อยก่อนปิดภาคการศึกษา',
+        menuDashboard: 'แดชบอร์ดภาพรวม',
+        menuProfile: 'บันทึกแต้ม ASCEND (28 รายการ)',
+        menuComments: 'คลังความเห็น & สมุดพก',
+        menuTraining: 'ประวัติการอบรม (Transcript)',
+        menuChecklist: 'เช็กลิสต์สิ้นภาคเรียน',
+      },
+      en: {
+        appTitle: 'School Academic System',
+        academicYear: 'Academic Year 2026-2027 • Term 1',
+        level: 'Level',
+        points: 'Points',
+        needPoints: 'Need',
+        toElite: 'points to Elite',
+        days: 'days',
+        items: 'items',
+        hours: 'hours',
+        ascendPoints: 'ASCEND Total Points',
+        credits: 'ASCEND Credits',
+        avgObserveScore: 'Average Observe Score',
+        latestScore: 'Latest Score',
+        leaveBalance: 'Remaining Leave Days',
+        leaveDetail: '3 Sick / 3 Personal',
+        termChecklist: 'End of Term Tasks',
+        pendingReview: 'Awaiting end of term review',
+        todaySchedule: "Today's Schedule & Duty (Monday - Even Week)",
+        ascendLogTitle: 'ASCEND Activity & Points Log',
+        ascendLogSubtitle: '28 Real entries synced from Google Spreadsheet',
+        totalEntries: 'Total Logs',
+        colDate: 'Date',
+        colType: 'Category',
+        colReport: 'Report / Activity Issue',
+        colAdd: 'Add',
+        colSub: 'Sub',
+        colTotal: 'Balance',
+        commentBuilderTitle: 'Smart Report Card Comment Builder',
+        commentBuilderSubtitle: 'Automatically formats student names & pronouns',
+        selectStudent: 'Select Student',
+        selectCategory: 'Category',
+        selectLevel: 'Performance Rating',
+        boy: 'Boy',
+        girl: 'Girl',
+        characteristics: 'Characteristics',
+        attitude: 'Attitude & Learning',
+        recommendation: 'Recommendation for Parents',
+        ratingGood: 'Good / Outstanding',
+        ratingImprove: 'Needs Improvement',
+        clickToAdd: 'Click any template below to append to feedback box',
+        generatedCommentBox: 'Generated Feedback Draft (Ready for export)',
+        clearText: 'Clear Text',
+        saveToReport: 'Save to Report Card',
+        trainingTitle: 'Professional Learning Transcript',
+        trainingSubtitle: 'Teacher professional development training record',
+        totalHours: 'Total Hours',
+        checklistTitle: 'End of Term 1 Checklist',
+        checklistSubtitle: 'Please verify all tasks before term departure',
+        menuDashboard: 'Overview Dashboard',
+        menuProfile: 'ASCEND Log (28 Records)',
+        menuComments: 'Comment Bank & Reports',
+        menuTraining: 'Training Transcript',
+        menuChecklist: 'End of Term Checklist',
+      }
+    };
 
     createApp({
       data() {
         return {
+          lang: 'th',
           currentTab: 'dashboard',
-          dbConnected: false,
           teacher: {
-            full_name: 'Mr. Jaun Dre Steyn (JD)',
+            fullName: 'Mr. Jaun Dre Steyn (JD)',
             nickname: 'JD',
-            school: 'โรงเรียนเด่นหล้า เพชรเกษม',
-            ascend_points: 3410,
-            rank_level: 6,
-            rank_title: 'Exemplary',
-            avg_observation_score: '95.76% (A+)',
-            leave_balance: 6
+            school: 'โรงเรียนเด่นหล้า เพชรเกษม (Denla Phetkasem)',
+            points: 3410,
+            rankLevel: 6,
+            rankTitle: 'Exemplary',
+            pointsUntilNext: 590,
+            credits: '5 Credits - Full',
+            avgScore: '95.76% (A+)',
+            leaveDays: 6
           },
-          todaySchedule: [
-            { time_slot: '08:00 - 08:30', subject: 'เข้าแถวและสวดมนต์ (Chanting Duty)', room: 'โถง DIP', badge: 'เวรประจำวัน', badge_class: 'text-amber-600 bg-amber-50' },
-            { time_slot: '08:30 - 09:00', subject: 'English Class K1.4', room: 'ห้อง K1.4', badge: 'คาบสอนหลัก', badge_class: 'text-emerald-600 bg-emerald-50' },
-            { time_slot: '10:10 - 10:40', subject: 'Science - Sense of Taste', room: 'ห้องวิทย์ DIP', badge: 'คาบสอนหลัก', badge_class: 'text-emerald-600 bg-emerald-50' },
-            { time_slot: '11:10 - 12:20', subject: 'พักกลางวันและดูแลเด็กรับประทานอาหาร', room: 'โรงอาหาร', badge: 'เวรประจำวัน', badge_class: 'text-amber-600 bg-amber-50' },
-            { time_slot: '14:00 - 15:00', subject: 'Oxford Round 1 (Afterschool)', room: 'ห้อง B204', badge: 'คลาสเสริม', badge_class: 'text-indigo-600 bg-indigo-50' }
-          ],
           menus: [
-            { id: 'dashboard', name: 'แดชบอร์ดภาพรวม', icon: '📊' },
-            { id: 'profile', name: 'โปรไฟล์ & แต้ม ASCEND', icon: '🎖️' },
-            { id: 'schedule', name: 'ตารางสอนและหน้าที่', icon: '📅' },
-            { id: 'lessons', name: 'แผนการสอน (Week 0-19)', icon: '📝' },
-            { id: 'observe', name: 'ผลการสังเกตการสอน', icon: '⭐' },
-            { id: 'comments', name: 'คลังความเห็น & สมุดพก', icon: '💬' },
-            { id: 'checklist', name: 'เช็กลิสต์สิ้นภาคเรียน', icon: '✅' },
+            { id: 'dashboard', i18nKey: 'menuDashboard', icon: '📊' },
+            { id: 'profile', i18nKey: 'menuProfile', icon: '🎖️' },
+            { id: 'comments', i18nKey: 'menuComments', icon: '💬' },
+            { id: 'training', i18nKey: 'menuTraining', icon: '🎓' },
+            { id: 'checklist', i18nKey: 'menuChecklist', icon: '✅' },
+          ],
+          todaySchedule: [
+            { time: '08:00 - 08:30', subject_th: 'เข้าแถวและสวดมนต์ (Chanting Duty)', subject_en: 'Assembly & Chanting Duty', room: 'โถง DIP', badge_th: 'เวรประจำวัน', badge_en: 'Daily Duty', badgeClass: 'bg-amber-100 text-amber-800' },
+            { time: '08:30 - 09:00', subject_th: 'ภาษาอังกฤษ ชั้น K1.4', subject_en: 'English Class K1.4', room: 'ห้อง K1.4', badge_th: 'คาบสอนหลัก', badge_en: 'Core Lesson', badgeClass: 'bg-emerald-100 text-emerald-800' },
+            { time: '10:10 - 10:40', subject_th: 'วิทยาศาสตร์ - ประสาทสัมผัสรับรส (Sense of Taste)', subject_en: 'Science - Sense of Taste', room: 'ห้องวิทย์ DIP', badge_th: 'คาบสอนหลัก', badge_en: 'Core Lesson', badgeClass: 'bg-emerald-100 text-emerald-800' },
+            { time: '11:10 - 12:20', subject_th: 'พักกลางวันและดูแลเด็กรับประทานอาหาร', subject_en: 'Lunch Time Supervision', room: 'โรงอาหาร', badge_th: 'เวรประจำวัน', badge_en: 'Duty', badgeClass: 'bg-amber-100 text-amber-800' },
+            { time: '14:00 - 15:00', subject_th: 'อ็อกซ์ฟอร์ด รอบที่ 1 (Afterschool)', subject_en: 'Oxford Round 1 (Afterschool)', room: 'ห้อง B204', badge_th: 'คลาสเสริม', badge_en: 'Academy', badgeClass: 'bg-indigo-100 text-indigo-800' }
+          ],
+          ascendLogs: [
+            { date: '2026-05-11', type: 'Professionalism', add: 30, sub: 0, total: 2330, issue: 'Helping assist with schedule adjustments to ensure smooth transitions.', issue_th: 'ช่วยประสานงานปรับเปลี่ยนตารางเวลาเพื่อให้การจัดการชั้นเรียนราบรื่น' },
+            { date: '2026-05-20', type: 'Attendance', add: 50, sub: 0, total: 2380, issue: 'On-time clock-in', issue_th: 'บันทึกเวลาเข้างานตรงเวลา' },
+            { date: '2026-05-20', type: 'Professionalism', add: 50, sub: 0, total: 2430, issue: 'Organized workspace', issue_th: 'จัดพื้นที่ทำงานเป็นระเบียบเรียบร้อย' },
+            { date: '2026-06-08', type: 'Academic', add: 30, sub: 0, total: 2460, issue: 'Staying beyond required working hours to review worksheets', issue_th: 'อยู่ปฏิบัติงานเกินเวลาเพื่อตรวจทานแบบฝึกหัดของนักเรียน' },
+            { date: '2026-06-09', type: 'Professionalism', add: 30, sub: 0, total: 2490, issue: 'Going above and beyond interacting with students in Oxfords', issue_th: 'ทุ่มเทดูแลและมีปฏิสัมพันธ์กับเด็กในคลาส Oxford เกินความคาดหมาย' },
+            { date: '2026-06-18', type: 'Professionalism', add: 40, sub: 0, total: 2530, issue: 'Clean & Organized Desk', issue_th: 'โต๊ะทำงานสะอาดและเป็นระเบียบ' },
+            { date: '2026-06-18', type: 'Professionalism', add: 40, sub: 0, total: 2570, issue: 'Lesson Plan Submitted', issue_th: 'ส่งแผนการจัดการเรียนรู้ตรงเวลา' },
+            { date: '2026-06-24', type: 'Attendance', add: 100, sub: 0, total: 2670, issue: 'Clocked In On Time (7:30 AM or earlier)', issue_th: 'บันทึกเวลาเข้างานตรงเวลา (ก่อน 7:30 น.)' },
+            { date: '2026-06-24', type: 'Attendance', add: 0, sub: 10, total: 2660, issue: 'Clocked In Late (after 7:30 AM)', issue_th: 'บันทึกเวลาเข้างานสาย (หลัง 7:30 น.)' },
+            { date: '2026-06-24', type: 'Attendance', add: 0, sub: 20, total: 2640, issue: 'Missed Clock In', issue_th: 'ลืมบันทึกเวลาเข้างาน' },
+            { date: '2026-07-06', type: 'Academic', add: 40, sub: 0, total: 2680, issue: 'Oxford Reports (Early)', issue_th: 'ส่งรายงานคลาส Oxford ก่อนกำหนด' },
+            { date: '2026-07-06', type: 'Academic', add: 40, sub: 0, total: 2720, issue: 'Comment Trackers Submitted', issue_th: 'ส่งตัวติดตามความคิดเห็นนักเรียน' },
+            { date: '2026-07-06', type: 'Academic', add: 50, sub: 0, total: 2770, issue: 'Midterms Submitted (Early)', issue_th: 'ส่งรายงานผลการเรียนกลางภาคก่อนกำหนด' },
+            { date: '2026-07-06', type: 'Survey', add: 100, sub: 0, total: 2870, issue: 'Awarded for participation in ASCEND 90-Day Staff Survey', issue_th: 'เข้าร่วมทำแบบสอบถามบุคลากร ASCEND 90 วัน' },
+            { date: '2026-07-09', type: 'Professionalism', add: 60, sub: 0, total: 2930, issue: 'Clean & Organized Desk', issue_th: 'โต๊ะทำงานสะอาดและเป็นระเบียบเรียบร้อย' },
+            { date: '2026-07-09', type: 'Professionalism', add: 60, sub: 0, total: 2990, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการจัดการเรียนรู้เรียบร้อย' },
+            { date: '2026-07-16', type: 'Professionalism', add: 40, sub: 0, total: 3030, issue: 'Online Training Tech Completed', issue_th: 'ผ่านการอบรมเทคโนโลยีออนไลน์' },
+            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3045, issue: 'Clean & Organized Desk', issue_th: 'โต๊ะทำงานสะอาดเป็นระเบียบ' },
+            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3060, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการสอนเรียบร้อย' },
+            { date: '2026-07-17', type: 'Professionalism', add: 15, sub: 0, total: 3075, issue: 'Stand-out Participation & Engagement', issue_th: 'มีส่วนร่วมและกระตือรือร้นโดดเด่น' },
+            { date: '2026-07-22', type: 'Professionalism', add: 30, sub: 0, total: 3235, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการจัดการเรียนรู้ตรงเวลา' },
+            { date: '2026-07-22', type: 'Professionalism', add: 30, sub: 0, total: 3265, issue: 'Kids Carnival Costume Recognition', issue_th: 'ได้รับการชื่นชมการแต่งกายงาน Kids Carnival' },
+            { date: '2026-07-23', type: 'Professionalism', add: 95, sub: 0, total: 3360, issue: 'Emergency Oxford Class Coverage', issue_th: 'ช่วยสอนแทนคลาส Oxford กรณีฉุกเฉิน' },
+            { date: '2026-08-14', type: 'Professionalism', add: 25, sub: 0, total: 3385, issue: 'Clean & Organized Desk', issue_th: 'ตรวจโต๊ะทำงานสะอาดเรียบร้อย' },
+            { date: '2026-08-14', type: 'Professionalism', add: 25, sub: 0, total: 3410, issue: 'Lesson Plans Submitted', issue_th: 'ส่งแผนการสอนครบถ้วน' }
+          ],
+          students: [
+            { name: 'Perkin', class: 'K1.1', gender: 'boy' },
+            { name: 'Kin', class: 'K2.5', gender: 'boy' },
+            { name: 'Arya', class: 'K1.4', gender: 'girl' },
+            { name: 'Tim', class: 'K1.4', gender: 'boy' },
+            { name: 'Licha', class: 'K2.6', gender: 'girl' }
+          ],
+          selectedStudent: { name: 'Perkin', class: 'K1.1', gender: 'boy' },
+          selectedCategory: 'CHARACTERISTICS',
+          selectedLevel: 'Good',
+          availableTemplates: [
+            {
+              en: "____ is an intelligent boy/girl who always shows interest in learning.",
+              th: "____ เป็นเด็กที่เฉลียวฉลาดและมีความสนใจในการเรียนรู้อย่างสม่ำเสมอ"
+            },
+            {
+              en: "____ , being both bright and sociable, is a real asset to our class.",
+              th: "____ มีความกระตือรือร้นและเข้ากับเพื่อนๆ ได้ดี นับเป็นกำลังสำคัญของห้องเรียน"
+            },
+            {
+              en: "As I get to know ____ , I realize what an interesting and creative individual she/he is.",
+              th: "ยิ่งได้รู้จัก ____ ยิ่งพบว่าเป็นเด็กที่มีความคิดสร้างสรรค์และน่าสนใจมาก"
+            },
+            {
+              en: "____ is becoming a confident English speaker.",
+              th: "____ มีความมั่นใจในการพูดภาษาอังกฤษมากขึ้นอย่างเห็นได้ชัด"
+            }
+          ],
+          generatedComment: '',
+          trainingList: [
+            { date: '2026-05-04', topic: 'Company Rules & Regs', topic_th: 'กฎระเบียบและข้อบังคับองค์กร', hours: 0.5, evidence: 'Attendance' },
+            { date: '2026-05-04', topic: 'Thai Culture in the Classroom', topic_th: 'วัฒนธรรมไทยในชั้นเรียน', hours: 0.5, evidence: 'Attendance' },
+            { date: '2026-05-04', topic: 'Understanding Young ESL Learners', topic_th: 'ความเข้าใจผู้เรียนเด็กเล็กภาษาอังกฤษ', hours: 0.5, evidence: 'Attendance' },
+            { date: '2026-05-04', topic: 'Classroom management', topic_th: 'การจัดการชั้นเรียน', hours: 1.0, evidence: 'Attendance' },
+            { date: '2026-05-05', topic: 'Using songs & dance in the classroom', topic_th: 'การใช้บทเพลงและการเคลื่อนไหว', hours: 1.0, evidence: 'Attendance' },
+            { date: '2026-05-05', topic: 'Structuring a 30 minute lesson', topic_th: 'การวางโครงสร้างบทเรียน 30 นาที', hours: 1.0, evidence: 'Lesson Plan' }
+          ],
+          termTasks: [
+            { checked: false, title_en: 'Midterm/Final Reports', title_th: 'รายงานผลการเรียนกลางภาค/ปลายภาค', desc_en: 'Add stars and detailed comments for every student.', desc_th: 'ระบุคะแนนดาวและข้อคิดเห็นให้ครบถ้วนทุกรายบุคคล' },
+            { checked: false, title_en: 'Afterschool Reports', title_th: 'รายงานคลาสเรียนพิเศษหลังเลิกเรียน', desc_en: 'Submit Oxford and Little Owls progress reports.', desc_th: 'ส่งรายงานความก้าวหน้าคอร์ส Oxford และ Little Owls' },
+            { checked: false, title_en: 'Signing / Checking Workbooks', title_th: 'ตรวจและลงลายมือชื่อในสมุดงาน', desc_en: 'Signing and checking all worksheets & workbooks.', desc_th: 'ตรวจเช็กแบบฝึกหัดและเซ็นชื่อกำกับทั้งหมด' },
+            { checked: false, title_en: 'Clean Desks & Stations', title_th: 'ทำความสะอาดโต๊ะทำงานและพื้นที่ส่วนตัว', desc_en: 'Ensure workspace is completely cleared.', desc_th: 'จัดโต๊ะทำงานให้สะอาดเรียบร้อยก่อนปิดภาคเรียน' },
+            { checked: false, title_en: 'Final Time Sheet', title_th: 'กรอกใบลงเวลาทำงานรอบสุดท้าย', desc_en: 'Fill in and verify monthly timesheet.', desc_th: 'ตรวจสอบและยื่นใบสรุปเวลาทำงานประจำเดือน' }
           ]
         };
       },
       computed: {
-        currentMenuTitle() {
+        currentTabTitle() {
           const m = this.menus.find(item => item.id === this.currentTab);
-          return m ? m.name : '';
-        },
-        currentMenuIcon() {
-          const m = this.menus.find(item => item.id === this.currentTab);
-          return m ? m.icon : '📌';
+          return m ? this.t(m.i18nKey) : '';
         }
       },
-      mounted() {
-        this.connectSupabase();
-      },
       methods: {
-        async connectSupabase() {
-          if (SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
-            console.log('ยังไม่ได้กรอก Supabase URL ใช้ข้อมูลจำลองชั่วคราว');
-            return;
+        t(key) {
+          return translations[this.lang][key] || key;
+        },
+        previewSentence(text) {
+          if (!this.selectedStudent) return text;
+          const s = this.selectedStudent;
+          let res = text.replace(/____/g, s.name);
+          if (s.gender === 'boy') {
+            res = res.replace(/boy\/girl/g, 'boy').replace(/she\/he/g, 'he').replace(/her\/his/g, 'his');
+          } else {
+            res = res.replace(/boy\/girl/g, 'girl').replace(/she\/he/g, 'she').replace(/her\/his/g, 'her');
           }
-          try {
-            const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            
-            // 1. ดึงข้อมูลโปรไฟล์ครู
-            const { data: teacherData, error: tErr } = await db.from('teachers').select('*').limit(1).single();
-            if (teacherData && !tErr) {
-              this.teacher = teacherData;
-            }
-
-            // 2. ดึงข้อมูลตารางสอน
-            const { data: schedData, error: sErr } = await db.from('schedules').select('*').order('id', { ascending: true });
-            if (schedData && schedData.length > 0 && !sErr) {
-              this.todaySchedule = schedData;
-            }
-
-            this.dbConnected = true;
-          } catch (e) {
-            console.error('เชื่อมต่อฐานข้อมูลล้มเหลว:', e);
-          }
+          return res;
+        },
+        applyTemplate(tpl) {
+          const applied = this.previewSentence(this.lang === 'th' ? tpl.th : tpl.en);
+          this.generatedComment = this.generatedComment ? this.generatedComment + ' ' + applied : applied;
+        },
+        saveComment() {
+          if (!this.generatedComment) return;
+          alert(this.lang === 'th' ? 'บันทึกความเห็นเรียบร้อยแล้ว!' : 'Report comment saved successfully!');
         }
       }
     }).mount('#app');
