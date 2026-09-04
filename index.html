@@ -122,6 +122,12 @@
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <p class="text-xs text-slate-500 font-medium">{{ t('leaveBalance') }}</p>
+              <p class="text-3xl font-bold text-blue-600 mt-1">{{ (teacher.sickLeaveRemaining + teacher.personalLeaveRemaining) }} {{ t('days') }}</p>
+              <p class="text-xs text-slate-400 mt-2">{{ t('sickLeave') }}: {{ teacher.sickLeaveRemaining }} | {{ t('personalLeave') }}: {{ teacher.personalLeaveRemaining }}</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <p class="text-xs text-slate-500 font-medium">ครูในระบบทั้งหมด</p>
               <p class="text-3xl font-bold text-emerald-600 mt-1">{{ teacherList.length }} ท่าน</p>
               <p class="text-xs text-slate-400 mt-2">ครูผู้สอนหลัก 18 / ครูภาษา 7</p>
@@ -132,16 +138,173 @@
               <p class="text-3xl font-bold text-navy-700 mt-1">{{ classroomList.length }} ห้อง</p>
               <p class="text-xs text-slate-400 mt-2">Pre-K, K1, K2, K3 ครบทุกระดับ</p>
             </div>
-
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p class="text-xs text-slate-500 font-medium">สิทธิ์การลาคงเหลือ (JD)</p>
-              <p class="text-3xl font-bold text-blue-600 mt-1">6 วัน</p>
-              <p class="text-xs text-slate-400 mt-2">ลาป่วย 3 วัน / ลากิจ 3 วัน</p>
-            </div>
           </div>
         </div>
 
-        <!-- แท็บ 2: ฐานข้อมูลครูผู้สอน (Teachers Directory - 25 ท่าน) -->
+        <!-- แท็บ 2: ระบบยื่นคำขอลางานด้วยตัวเอง (Self-Service Leave Request) -->
+        <div v-if="currentTab === 'leave'" class="space-y-6">
+          
+          <!-- บัตรแสดงสิทธิ์วันลาคงเหลือตามสัญญา DOR 2627 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">{{ t('sickLeave') }} (Section 5.3)</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">ต้องมีใบรับรองแพทย์</span>
+              </div>
+              <div class="flex items-baseline gap-2 mt-2">
+                <p class="text-3xl font-bold text-navy-900">{{ teacher.sickLeaveRemaining }}</p>
+                <span class="text-xs text-slate-400">/ 3 {{ t('days') }}</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-2">สิทธิ์ลาป่วยและอุบัติเหตุพร้อมใบรับรองแพทย์</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">{{ t('personalLeave') }} (Section 5.4)</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">อนุมัติล่วงหน้า</span>
+              </div>
+              <div class="flex items-baseline gap-2 mt-2">
+                <p class="text-3xl font-bold text-navy-900">{{ teacher.personalLeaveRemaining }}</p>
+                <span class="text-xs text-slate-400">/ 3 {{ t('days') }}</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-2">สิทธิ์ลากิจส่วนตัวตามระเบียบโรงเรียน</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">{{ t('unpaidLeave') }} (Section 5.6-5.8)</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">ไม่รับค่าจ้าง</span>
+              </div>
+              <div class="flex items-baseline gap-2 mt-2">
+                <p class="text-3xl font-bold text-navy-900">{{ teacher.unpaidLeaveUsed }}</p>
+                <span class="text-xs text-slate-400">{{ t('daysUsed') }}</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-2">การลาเกินโควตาหรือไม่ได้รับค่าจ้าง</p>
+            </div>
+          </div>
+
+          <!-- แบบฟอร์มยื่นคำขอลางาน -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+            <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                  <span>📝</span>
+                  <span>{{ t('submitLeaveTitle') }}</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">{{ t('submitLeaveSubtitle') }}</p>
+              </div>
+              <span class="text-xs bg-navy-50 text-navy-900 px-3 py-1 rounded-md font-semibold font-mono">
+                ผู้ยื่น: {{ teacher.fullName }}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('leaveType') }} *</label>
+                <select v-model="newLeave.type" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-slate-50 focus:bg-white focus:border-navy-500 transition">
+                  <option value="sick">{{ t('sickLeaveOpt') }}</option>
+                  <option value="personal">{{ t('personalLeaveOpt') }}</option>
+                  <option value="unpaid">{{ t('unpaidLeaveOpt') }}</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('startDate') }} *</label>
+                <input type="date" v-model="newLeave.startDate" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:border-navy-500 transition">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('endDate') }} *</label>
+                <input type="date" v-model="newLeave.endDate" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:border-navy-500 transition">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">{{ t('leaveReason') }} *</label>
+                <textarea v-model="newLeave.reason" rows="3" :placeholder="t('reasonPlaceholder')" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-slate-50 focus:bg-white focus:border-navy-500 transition"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  {{ t('medicalNote') }}
+                  <span v-if="newLeave.type === 'sick'" class="text-rose-500 font-bold">* (จำเป็นสำหรับการลาป่วย)</span>
+                  <span v-else class="text-slate-400 font-normal">({{ t('optional') }})</span>
+                </label>
+                <div class="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer">
+                  <input type="file" @change="handleFileUpload" class="text-xs text-slate-500 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-navy-900 file:text-white hover:file:bg-navy-800">
+                  <p v-if="newLeave.fileName" class="text-xs text-emerald-600 font-bold mt-2">📎 ไฟล์แนบ: {{ newLeave.fileName }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+              <button @click="resetLeaveForm" class="px-4 py-2 text-xs border border-slate-300 rounded-lg font-semibold hover:bg-slate-100 text-slate-600">
+                {{ t('clearForm') }}
+              </button>
+              <button @click="submitLeaveRequest" class="px-5 py-2 text-xs bg-navy-900 hover:bg-navy-800 text-white font-bold rounded-lg shadow flex items-center gap-1.5">
+                <span>✈️</span>
+                <span>{{ t('submitRequest') }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ตารางแสดงประวัติและสถานะการลางาน -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                <span>📋</span>
+                <span>{{ t('leaveHistoryTitle') }}</span>
+              </h3>
+              <span class="text-xs text-slate-500">{{ t('totalRequests') }}: {{ leaveRequests.length }} {{ t('items') }}</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-navy-900 text-white font-bold">
+                  <tr>
+                    <th class="py-3 px-3 w-28">{{ t('colDate') }}</th>
+                    <th class="py-3 px-3 w-32">{{ t('leaveType') }}</th>
+                    <th class="py-3 px-3 w-40">{{ t('period') }}</th>
+                    <th class="py-3 px-3">{{ t('leaveReason') }}</th>
+                    <th class="py-3 px-3 text-center w-28">{{ t('medicalNote') }}</th>
+                    <th class="py-3 px-3 text-center w-28">{{ t('status') }}</th>
+                    <th class="py-3 px-2 text-center w-12">{{ t('action') }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                  <tr v-for="(req, rIdx) in leaveRequests" :key="rIdx" class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-3 font-mono text-slate-500">{{ req.requestDate }}</td>
+                    <td class="py-3 px-3">
+                      <span class="px-2 py-0.5 rounded text-[11px] font-bold"
+                        :class="req.type === 'sick' ? 'bg-blue-50 text-blue-700 border border-blue-200' : (req.type === 'personal' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-purple-50 text-purple-700 border border-purple-200')">
+                        {{ getLeaveTypeName(req.type) }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-3 font-mono text-slate-700">{{ req.startDate }} ถึง {{ req.endDate }} ({{ req.daysCount }} วัน)</td>
+                    <td class="py-3 px-3 text-slate-800 font-medium">{{ req.reason }}</td>
+                    <td class="py-3 px-3 text-center">
+                      <span v-if="req.fileName" class="text-emerald-600 font-bold">✓ มีเอกสาร</span>
+                      <span v-else class="text-slate-400">-</span>
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                      <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                        :class="req.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
+                        {{ req.status === 'Approved' ? t('statusApproved') : t('statusPending') }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                      <button @click="cancelLeave(rIdx)" class="text-slate-400 hover:text-rose-600 font-bold text-sm">✕</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- แท็บ 3: ฐานข้อมูลครูผู้สอน (25 ท่าน) -->
         <div v-if="currentTab === 'teachers'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
@@ -149,16 +312,14 @@
                 <span>👨‍🏫</span>
                 <span>ฐานข้อมูลครูผู้สอนทั้งหมด (Teacher Master Directory)</span>
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">รายชื่อครูผู้สอนและฝ่ายสนับสนุนวิชาการจากไฟล์ตารางสอนปี 2026-2027 (สามารถแก้ไขและเพิ่มข้อมูลได้)</p>
+              <p class="text-xs text-slate-500 mt-0.5">รายชื่อครูผู้สอนและฝ่ายสนับสนุนวิชาการจากไฟล์ตารางสอนปี 2026-2027</p>
             </div>
             <div class="flex items-center gap-3">
               <button @click="addTeacher" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
-                <span>+</span>
-                <span>เพิ่มครูผู้สอน</span>
+                <span>+ เพิ่มครูผู้สอน</span>
               </button>
-              <button @click="saveAllData" class="px-3.5 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1">
-                <span>💾</span>
-                <span>บันทึกข้อมูลครู</span>
+              <button @click="saveAllData" class="px-3.5 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-lg shadow">
+                💾 บันทึกข้อมูลครู
               </button>
             </div>
           </div>
@@ -201,7 +362,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 3: ฐานข้อมูลห้องเรียน (Classrooms Master - 32 ห้อง) -->
+        <!-- แท็บ 4: ฐานข้อมูลห้องเรียน (32 ห้อง) -->
         <div v-if="currentTab === 'classrooms'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
@@ -247,7 +408,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 4: ตารางสอน 4 ห้องเรียน (K1.1, K1.4, K2.5, K2.6) -->
+        <!-- แท็บ 5: ตารางสอน 4 ห้องเรียน (K1.1, K1.4, K2.5, K2.6) -->
         <div v-if="currentTab === 'schedule'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
@@ -304,7 +465,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 5: บันทึกแต้ม ASCEND (28 รายการ) -->
+        <!-- แท็บ 6: บันทึกแต้ม ASCEND (28 รายการ) -->
         <div v-if="currentTab === 'profile'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
@@ -369,7 +530,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 6: คลังความคิดเห็น & สมุดพก -->
+        <!-- แท็บ 7: คลังความคิดเห็น & สมุดพก -->
         <div v-if="currentTab === 'comments'" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
           <div>
             <h3 class="font-bold text-base text-navy-900">{{ t('commentBuilderTitle') }}</h3>
@@ -425,7 +586,7 @@
           </div>
         </div>
 
-        <!-- แท็บ 7: เอกสาร Google Sheets ทั้งหมด (เปิดในระบบและเปิดข้างนอก) -->
+        <!-- แท็บ 8: ศูนย์รวมเอกสาร Google Sheets -->
         <div v-if="currentTab === 'links'" class="space-y-6">
           <div v-if="!activeSheet" class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
             <div class="border-b border-slate-100 pb-4">
@@ -503,8 +664,36 @@
         academicYear: 'ภาคเรียนที่ 1 ปีการศึกษา 2026-2027 • เด่นหล้า เพชรเกษม',
         level: 'ระดับ',
         points: 'แต้ม',
+        days: 'วัน',
+        items: 'รายการ',
         ascendPoints: 'คะแนนสะสม ASCEND',
         credits: 'เครดิตสะสม',
+        leaveBalance: 'สิทธิ์การลาคงเหลือ (DOR)',
+        sickLeave: 'ลาป่วย / อุบัติเหตุ',
+        personalLeave: 'ลากิจส่วนตัว',
+        unpaidLeave: 'ลาไม่รับค่าจ้าง',
+        daysUsed: 'วัน (ใช้ไปแล้ว)',
+        submitLeaveTitle: 'ยื่นคำขอลางานออนไลน์ (Self-Service Leave Request)',
+        submitLeaveSubtitle: 'อ้างอิงเงื่อนไขและสิทธิ์วันลาตามสัญญาจ้างหมวด 5 (DOR 2627)',
+        leaveType: 'ประเภทการลา',
+        sickLeaveOpt: 'ลาป่วย / อุบัติเหตุ (มีใบรับรองแพทย์ - สัญญา 5.3)',
+        personalLeaveOpt: 'ลากิจส่วนตัว (แจ้งล่วงหน้า - สัญญา 5.4)',
+        unpaidLeaveOpt: 'การลาโดยไม่รับค่าจ้าง (สัญญา 5.6-5.8)',
+        startDate: 'ตั้งแต่วันที่',
+        endDate: 'ถึงวันที่',
+        leaveReason: 'เหตุผลการลา',
+        reasonPlaceholder: 'ระบุเหตุผลและรายละเอียดการลาเพื่อเสนอผู้บริหารพิจารณา...',
+        medicalNote: 'ใบรับรองแพทย์ (Medical Certificate)',
+        optional: 'ไม่บังคับ',
+        clearForm: 'ล้างข้อมูล',
+        submitRequest: 'ส่งคำขอลางาน',
+        leaveHistoryTitle: 'ประวัติและสถานะการลางาน',
+        totalRequests: 'รายการคำขอทั้งหมด',
+        period: 'ระยะเวลาที่ลา',
+        status: 'สถานะ',
+        statusApproved: 'อนุมัติแล้ว',
+        statusPending: 'รออนุมัติ',
+        action: 'จัดการ',
         classroomScheduleTitle: 'ตารางสอนรายห้องเรียน',
         rotationNote: 'ดึงข้อมูลตรงจากระบบตารางเวียน 10 วัน (Odd/Even Week Rotation)',
         colDay: 'วันในสัปดาห์',
@@ -533,6 +722,7 @@
         clearText: 'ล้างข้อความ',
         saveToReport: 'บันทึกลงสมุดพก',
         menuDashboard: 'แดชบอร์ดภาพรวม',
+        menuLeave: 'ยื่นคำขอลางาน (DOR)',
         menuTeachers: 'ฐานข้อมูลครู (25 ท่าน)',
         menuClassrooms: 'ฐานข้อมูลห้องเรียน (32 ห้อง)',
         menuSchedule: 'ตารางสอน 4 ห้องเรียน',
@@ -545,8 +735,36 @@
         academicYear: 'Academic Year 2026-2027 • Term 1 • Denla Phetkasem',
         level: 'Level',
         points: 'Points',
+        days: 'days',
+        items: 'items',
         ascendPoints: 'ASCEND Total Points',
         credits: 'ASCEND Credits',
+        leaveBalance: 'Remaining Leave Days (DOR)',
+        sickLeave: 'Sick / Accident Leave',
+        personalLeave: 'Personal Leave',
+        unpaidLeave: 'Unpaid Leave',
+        daysUsed: 'days used',
+        submitLeaveTitle: 'Self-Service Leave Request (DOR 2627)',
+        submitLeaveSubtitle: 'In accordance with Employment Contract Section 5',
+        leaveType: 'Leave Type',
+        sickLeaveOpt: 'Sick / Accident Leave (Medical Note - Sec 5.3)',
+        personalLeaveOpt: 'Personal Leave (Prior Notice - Sec 5.4)',
+        unpaidLeaveOpt: 'Unpaid Leave (Sec 5.6-5.8)',
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        leaveReason: 'Reason for Leave',
+        reasonPlaceholder: 'Please state the purpose and details of your leave...',
+        medicalNote: 'Medical Certificate',
+        optional: 'Optional',
+        clearForm: 'Clear Form',
+        submitRequest: 'Submit Leave Request',
+        leaveHistoryTitle: 'Leave History & Status',
+        totalRequests: 'Total Requests',
+        period: 'Leave Period',
+        status: 'Status',
+        statusApproved: 'Approved',
+        statusPending: 'Pending Review',
+        action: 'Action',
         classroomScheduleTitle: 'Classroom Timetable',
         rotationNote: 'Synced with 10-Day Rotation Schedule (Odd/Even Week)',
         colDay: 'Day of Week',
@@ -575,6 +793,7 @@
         clearText: 'Clear Text',
         saveToReport: 'Save to Report Card',
         menuDashboard: 'Overview Dashboard',
+        menuLeave: 'Leave Requests (DOR)',
         menuTeachers: 'Teachers (25 Staff)',
         menuClassrooms: 'Classrooms (32 Classes)',
         menuSchedule: 'Schedules (4 Classes)',
@@ -600,10 +819,33 @@
             points: 3410,
             rankLevel: 6,
             rankTitle: 'Exemplary',
-            credits: '5 Credits - Full'
+            credits: '5 Credits - Full',
+            sickLeaveRemaining: 3,
+            personalLeaveRemaining: 3,
+            unpaidLeaveUsed: 0
           },
+          newLeave: {
+            type: 'sick',
+            startDate: new Date().toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0],
+            reason: '',
+            fileName: ''
+          },
+          leaveRequests: [
+            {
+              requestDate: '2026-06-15',
+              type: 'sick',
+              startDate: '2026-06-15',
+              endDate: '2026-06-15',
+              daysCount: 1,
+              reason: 'High fever and severe cold, visited hospital',
+              fileName: 'medical_cert_150626.pdf',
+              status: 'Approved'
+            }
+          ],
           menus: [
             { id: 'dashboard', i18nKey: 'menuDashboard', icon: '📊' },
+            { id: 'leave', i18nKey: 'menuLeave', icon: '✈️' },
             { id: 'teachers', i18nKey: 'menuTeachers', icon: '👨‍🏫' },
             { id: 'classrooms', i18nKey: 'menuClassrooms', icon: '🏫' },
             { id: 'schedule', i18nKey: 'menuSchedule', icon: '📅' },
@@ -611,7 +853,6 @@
             { id: 'comments', i18nKey: 'menuComments', icon: '💬' },
             { id: 'links', i18nKey: 'menuLinks', icon: '📑' },
           ],
-          // ฐานข้อมูลครู 25 ท่านจากตารางสอนจริง
           teacherList: [
             { code: 'P1', name: 'Lilly', role: 'Primary Teacher', classes: 'PK1 Jupiter, K2.8' },
             { code: 'P2', name: 'Cece', role: 'Primary Teacher', classes: 'PK2 Saturn, K3.6' },
@@ -639,7 +880,6 @@
             { code: 'LA6', name: 'Maria', role: 'Language Assistant (LA)', classes: 'English+ Round 1 & Round 2' },
             { code: 'LA7', name: 'Jec', role: 'Language Assistant (LA)', classes: 'Floating / Class Coverage' },
           ],
-          // ฐานข้อมูลห้องเรียน 32 ห้อง
           classroomList: [
             { name: 'PK1 Jupiter', level: 'Pre-K', leadTeacher: 'Lilly', building: 'DIP Floor 1' },
             { name: 'PK2 Saturn', level: 'Pre-K', leadTeacher: 'Cece', building: 'DIP Floor 1' },
@@ -852,6 +1092,90 @@
         t(key) {
           return translations[this.lang][key] || key;
         },
+        getLeaveTypeName(type) {
+          if (type === 'sick') return this.lang === 'th' ? 'ลาป่วย / อุบัติเหตุ' : 'Sick Leave';
+          if (type === 'personal') return this.lang === 'th' ? 'ลากิจส่วนตัว' : 'Personal Leave';
+          return this.lang === 'th' ? 'ลาไม่รับค่าจ้าง' : 'Unpaid Leave';
+        },
+        handleFileUpload(e) {
+          const file = e.target.files[0];
+          if (file) {
+            this.newLeave.fileName = file.name;
+          }
+        },
+        submitLeaveRequest() {
+          if (!this.newLeave.reason.trim()) {
+            alert(this.lang === 'th' ? 'กรุณาระบุเหตุผลการลา' : 'Please provide a reason for leave');
+            return;
+          }
+          if (this.newLeave.type === 'sick' && !this.newLeave.fileName) {
+            alert(this.lang === 'th' ? 'การลาป่วยจำเป็นต้องแนบใบรับรองแพทย์ตามสัญญาข้อ 5.3' : 'Medical certificate is required for sick leave (Section 5.3)');
+            return;
+          }
+
+          // คำนวณจำนวนวันลาเบื้องต้น
+          const start = new Date(this.newLeave.startDate);
+          const end = new Date(this.newLeave.endDate);
+          const diffTime = Math.abs(end - start);
+          const daysCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+          // ตรวจสอบโควตาคงเหลือ
+          if (this.newLeave.type === 'sick') {
+            if (this.teacher.sickLeaveRemaining < daysCount) {
+              alert(this.lang === 'th' ? 'วันลาป่วยคงเหลือไม่เพียงพอ (คงเหลือ ' + this.teacher.sickLeaveRemaining + ' วัน)' : 'Insufficient sick leave days');
+              return;
+            }
+            this.teacher.sickLeaveRemaining -= daysCount;
+          } else if (this.newLeave.type === 'personal') {
+            if (this.teacher.personalLeaveRemaining < daysCount) {
+              alert(this.lang === 'th' ? 'วันลากิจคงเหลือไม่เพียงพอ (คงเหลือ ' + this.teacher.personalLeaveRemaining + ' วัน)' : 'Insufficient personal leave days');
+              return;
+            }
+            this.teacher.personalLeaveRemaining -= daysCount;
+          } else {
+            this.teacher.unpaidLeaveUsed += daysCount;
+          }
+
+          const today = new Date().toISOString().split('T')[0];
+          this.leaveRequests.unshift({
+            requestDate: today,
+            type: this.newLeave.type,
+            startDate: this.newLeave.startDate,
+            endDate: this.newLeave.endDate,
+            daysCount: daysCount,
+            reason: this.newLeave.reason,
+            fileName: this.newLeave.fileName,
+            status: 'Pending'
+          });
+
+          this.saveAllData();
+          alert(this.lang === 'th' ? 'ยื่นคำขอลางานสำเร็จ! คำขอจะส่งไปยังฝ่ายบริหารเพื่อตรวจสอบ' : 'Leave request submitted successfully!');
+          this.resetLeaveForm();
+        },
+        cancelLeave(idx) {
+          if (confirm(this.lang === 'th' ? 'ต้องการยกเลิกคำขอลานี้ใช่หรือไม่?' : 'Cancel this leave request?')) {
+            const req = this.leaveRequests[idx];
+            // คืนโควตาวันลา
+            if (req.type === 'sick') {
+              this.teacher.sickLeaveRemaining = Math.min(3, this.teacher.sickLeaveRemaining + req.daysCount);
+            } else if (req.type === 'personal') {
+              this.teacher.personalLeaveRemaining = Math.min(3, this.teacher.personalLeaveRemaining + req.daysCount);
+            } else {
+              this.teacher.unpaidLeaveUsed = Math.max(0, this.teacher.unpaidLeaveUsed - req.daysCount);
+            }
+            this.leaveRequests.splice(idx, 1);
+            this.saveAllData();
+          }
+        },
+        resetLeaveForm() {
+          this.newLeave = {
+            type: 'sick',
+            startDate: new Date().toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0],
+            reason: '',
+            fileName: ''
+          };
+        },
         addTeacher() {
           this.teacherList.unshift({
             code: 'P' + (this.teacherList.length + 1),
@@ -911,9 +1235,10 @@
               classroomList: this.classroomList,
               scheduleData: this.scheduleData,
               ascendLogs: this.ascendLogs,
-              teacher: this.teacher
+              teacher: this.teacher,
+              leaveRequests: this.leaveRequests
             };
-            localStorage.setItem('ascend_full_data_v2', JSON.stringify(dataToSave));
+            localStorage.setItem('ascend_full_data_v3', JSON.stringify(dataToSave));
             this.saveMessage = '✓ บันทึกข้อมูลสำเร็จ';
             setTimeout(() => { this.saveMessage = ''; }, 2500);
           } catch (e) {
@@ -922,7 +1247,7 @@
         },
         loadSavedData() {
           try {
-            const saved = localStorage.getItem('ascend_full_data_v2');
+            const saved = localStorage.getItem('ascend_full_data_v3');
             if (saved) {
               const parsed = JSON.parse(saved);
               if (parsed.teacherList) this.teacherList = parsed.teacherList;
@@ -930,6 +1255,7 @@
               if (parsed.scheduleData) this.scheduleData = parsed.scheduleData;
               if (parsed.ascendLogs) this.ascendLogs = parsed.ascendLogs;
               if (parsed.teacher) this.teacher = parsed.teacher;
+              if (parsed.leaveRequests) this.leaveRequests = parsed.leaveRequests;
             }
           } catch (e) {
             console.error('โหลดข้อมูลเดิมล้มเหลว:', e);
